@@ -66,10 +66,10 @@ for iMeas=10:14
         
         % %% LOADING
         % frameRange=[frame inf];
-        [summaryLoading] = loading(allPaths,...
-            'frameRange',frameRange,...
-            'cropROI',metadata.ROI,...
-            'binning',metadata.softwareBinning);
+        %         [summaryLoading] = loading(allPaths,...
+        %             'frameRange',frameRange,...
+        %             'cropROI',metadata.ROI,...
+        %             'binning',metadata.softwareBinning);
         
         toc;
     catch
@@ -80,10 +80,21 @@ for iMeas=10:14
 end
 
 %% Batch Process Visual 81 & 82 filter movie in chunks
-mainFolder='B:\GEVI_Spike\Raw\Visual8Angles';%'P:\GEVI_Spike\Raw\Visual'
-mouse={'m81' 'm82'};
+mainFolder='B:\GEVI_Spike\Raw';
+experiment='Visual8Angles';%'P:\GEVI_Spike\Raw\Visual'
+mouse='m81';
+date=[];
+measurement=[];
 
-% date='20200416';
+% if just 1 folder to check, put the full path
+[folderPath]=batchProcessWrapper(mainFolder,...
+    'experiment',experiment,...
+    'mouse',mouse,...
+    'date',date,...
+    'measurement',measurement);
+
+%%
+
 for iMouse=1:length(mouse)
     dcimgPath=fullfile(mainFolder,mouse{iMouse});
     % shoudl be F drive...  h5Path=fullfile('F:\GEVI_Spike\Preprocessed\Visual\m81\20200416');
@@ -110,49 +121,20 @@ for iMouse=1:length(mouse)
             options.dcimgPathG=fullfile(h5Path,fileNameG);
             options.dcimgPathR=fullfile(h5Path,fileNameR);
             
-            % SET EXPORT PATH (define all necessary pointers)
-            [allPaths]=setExportPath(h5Path); % create all path for canonical steps
+            % SET ALL IMPORT/EXPORT PATH (define all necessary pointers)
+            [allPaths]=setExportPath(h5Path); 
             
-            try
-                % GET METADATA
-                [metadata]=getRawMetaData(allPaths,...
-                    'savePath',allPaths.pathDiagLoading,...
-                    'softwareBinning',1,...
-                    'autoCropping',true);
-                
-                
-                % does not work for old recording ORCA flash
-                frame=1;
-                [movieG,~,~]=loadDCIMG(options.dcimgPathG,[frame, frame+100]);
-                [movieR,~,~]=loadDCIMG(options.dcimgPathR,[frame, frame+100]);
-                
-                h=figure('defaultaxesfontsize',16,'color','w');
-                subplot(211)
-                imshow(bpFilter2D(mean(movieG,3),35,2),[])
-                title('Green Channel - avg & 2dFilter')
-                subplot(212)
-                imshow(bpFilter2D(fliplr(mean(movieR,3)),35,2),[])
-                title('Red Channel - avg & 2dFilter')
-                export_figure(h,'Average-2D Filter Movie - 100 frames',allPaths.pathDiagLoading);%close;
-                
-                fprintf('Green max %2.0f | Red max %2.0f \n', max(movieG(:)), max(movieR(:)));
-                metrics.maxPixelG=max(movieG(:));
-                metrics.maxPixelR=max(movieR(:));
-                
-                save(fullfile(allPaths.pathDiagLoading,'metrics.mat'),'metrics');                      
-                
-                % %% LOADING
-                % frameRange=[frame inf];
-%                 [summaryLoading] = loading(allPaths,...
-%                     'frameRange',[100 inf],...
-%                     'cropROI',metadata.ROI,...
-%                     'binning',metadata.softwareBinning);
-                
-                toc; fail(iMouse,iFolder)=0;
-            catch
-                disp('oups, this one failed...')
-                fail(iMouse,iFolder)=1;
-            end
+            % GET METADATA
+            [metadata]=getRawMetadata(allPaths,...
+                'savePath',allPaths.pathDiagLoading,...
+                'softwareBinning',1,...
+                'SpatialCropping','manual-auto-none',... % if manual > promt
+                'TemporalCropping','manual-auto-none',...% if manual > prompt frame range
+                'filterParameter',[],...% if empty > prompt for best parameter
+                'bandpass',true,'motionCorr',true,'denoising',[],'demixing','pcaica'); % if several methods, empty or method name
+            
+            [hyperparameters]=getPreprocessingHyperparam();
+            
         end
     end
 end
@@ -179,42 +161,32 @@ for iMouse=1:length(mouse)
             end
         end
         
-%         
-%         fileName=dir(fullfile(fullfile(h5PathMain,date,folderName{1}), '*_crop.h5')); % G always comes before R
-%         [fileNameG]=fileName.name; % for saving other outputs,
-%         
-%         h5PathG=fullfile(fileName(1).folder,fileNameG);
-%         
-%         [high,low]=findBestFilterParameters(h5PathG);
-%         bpFilter=[low high];
-        
         tic;
         k=1;
         fail=[];
         for iFolder=1:length(folderName)
             try
                 h5Path=fullfile(h5PathMain,date,folderName{iFolder});
-%                 fileName=dir(fullfile(h5Path, '*.h5')); % G always comes before R
+                %                 fileName=dir(fullfile(h5Path, '*.h5')); % G always comes before R
                 
-%                 [fileNameG, fileNameR]=fileName.name; % for saving other
+                %                 [fileNameG, fileNameR]=fileName.name; % for saving other
                 
-%                 h5Path=fullfile('F:\GEVI_Spike\Preprocessed\Visual8Angles\m78\20201012',folderName{iFolder});
+                %                 h5Path=fullfile('F:\GEVI_Spike\Preprocessed\Visual8Angles\m78\20201012',folderName{iFolder});
+                
                 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                 fileName=dir(fullfile(h5Path, '*.h5')); % G always comes before R
-%                 [fileNameG, fileNameR]=fileName.name; % for saving other outputs
-%                 
-%                 h5PathG=fullfile(h5Path,fileNameG);
-%                 h5PathR=fullfile(h5Path,fileNameR);
-%                 
-%                 testPath.h5PathG=h5PathG;
-%                 testPath.h5PathR=h5PathR;
-% 
-%                 [h5cropIndex,imcropRect]=h5movieCropping(testPath,'processWholeMovie',true);
-%                 
-%                 disp('End crop movie');toc;
+                
+                % %% LOADING
+                % frameRange=[frame inf];
+                %                 [summaryLoading] = loading(allPaths,...
+                %                     'frameRange',[100 inf],...
+                %                     'cropROI',metadata.ROI,...
+                %                     'binning',metadata.softwareBinning);
+                
+                disp('End Loading movie');toc;
+                
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+                
                 fileName=dir(fullfile(h5Path, '*_crop.h5')); % G always comes before R
                 [fileNameG, fileNameR]=fileName.name; % for saving other outputs
                 
@@ -229,7 +201,7 @@ for iMouse=1:length(mouse)
                 
                 fileName=dir(fullfile(h5Path, '*_bp.h5')); % G always comes before R
                 [fileNameG, fileNameR]=fileName.name; % for saving other outputs
-
+                
                 h5PathG=fullfile(h5Path,fileNameG);
                 h5PathR=fullfile(h5Path,fileNameR);
                 
@@ -237,17 +209,17 @@ for iMouse=1:length(mouse)
                 motionCorr1Movie(h5PathR,'templateLastFrame',false);
                 
                 disp('End Moco movie');toc;
-%                 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                 % fileName=dir(fullfile(h5Path, '*_moco.h5')); % G always comes before R
-%                 % [fileNameG, fileNameR]=fileName.name; % for saving other outputs
-%                 %
-%                 % h5PathG=fullfile(h5Path,fileNameG);
-%                 % h5PathR=fullfile(h5Path,fileNameR);
-%                 %
-%                 % denoisingSpatialChunk(h5PathG);
-%                 % denoisingSpatialChunk(h5PathR);
-%                 
-%                 disp('End Denoising movie');toc;
+                %                 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                %                 % fileName=dir(fullfile(h5Path, '*_moco.h5')); % G always comes before R
+                %                 % [fileNameG, fileNameR]=fileName.name; % for saving other outputs
+                %                 %
+                %                 % h5PathG=fullfile(h5Path,fileNameG);
+                %                 % h5PathR=fullfile(h5Path,fileNameR);
+                %                 %
+                %                 % denoisingSpatialChunk(h5PathG);
+                %                 % denoisingSpatialChunk(h5PathR);
+                %
+                %                 disp('End Denoising movie');toc;
             catch
                 disp('oups, this one failed...')
                 fail(k)=iFolder;k=k+1;
@@ -256,41 +228,14 @@ for iMouse=1:length(mouse)
         end
     end
 end
-        disp('failed measurements')
-        fail
-        toc;
-        %%
-        
-        %     try
-        %         filepathTTL = strrep(options.dcimgPathG,'.dcimg','_framestamps 0.txt');
-        %         [TTL]=importdata(filepathTTL);
-        %         if isstruct(TTL)
-        %            loco=TTL.data(:,2);
-        %         stim=TTL.data(:,4);
-        %         fluctuationLED=TTL.data(:,5:6);
-        %         else
-        %                        loco=TTL(:,2);
-        %         stim=TTL(:,4);
-        %         fluctuationLED=TTL(:,5:6);
-        %         end
-        %         plot(zscore([loco stim]))
-        %         % plot(zscore(fluctuationLED))
-        %
-        %         temp=diff(stim);
-        %         plot(temp)
-        %         frame0=find(diff(stim)==1,1,'first');
-        %         frameX=find(diff(stim)==-1,1,'last');
-        %         baseline=0.5; %in sec
-        %         fps=500; % in Hz
-        %
-        %         frameRange=[frame0-baseline*fps frameX+baseline*fps-1];
-        %         temp=stim(frameRange(1):frameRange(2));plot(temp,'o')
-        %
-        
-        
-        
-        
-        
-        
-        
-        
+disp('failed measurements')
+fail
+toc;
+%%
+
+
+
+
+
+
+

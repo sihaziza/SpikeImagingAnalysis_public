@@ -1,5 +1,9 @@
 function [output]=bpFilter2D(input,low,high,varargin)
 
+% created by Oscar Hernandez
+% modified by Radek Chrapkiewicz, Simon Haziza
+
+%% Gather options
 options.parallel=true;
 
 %% UPDATE OPTIONS

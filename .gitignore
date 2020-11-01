@@ -1,0 +1,16 @@
+# Simon Haziza
+
+# Ignore downloaded and generated analysis files
+demo/*
+*.dcimg
+*.h5
+/*.mat
+
+# Windows default autosave extension
+*.asv
+
+# OSX / *nix default autosave extension
+*.m~
+
+desktop.ini
+**/desktop.ini

@@ -23,9 +23,8 @@ function bandPassMovieChunk(h5Path,bpFilter,varargin)
 % if nargin>=4
 %     options=getOptions(options,varargin);
 % end
-options.windowsize=1000;
+options.windowsize=300;
 options.dataset='mov';
-options.bpMoviePath=strrep(h5Path,'.h5','_bp.h5');
 options.BandPx=bpFilter;
 options.verbose=true;
 options.diary=true;
@@ -46,6 +45,11 @@ disp('h5 file detected')
 dim=meta.Datasets.Dataspace.Size;
 mx=dim(1);my=dim(2);numFrame=dim(3);
 dataset=strcat(meta.Name,meta.Datasets.Name);
+options.bpMoviePath=strrep(h5Path,'.h5','_bp.h5');
+
+if exist(options.bpMoviePath,'file')==2
+    delete(options.bpMoviePath)
+end
 
 flims=[1 numFrame];% to update if specific frame number required
 
@@ -55,8 +59,8 @@ fprintf('Loading and processing %5g frames in chunks.\n', numFrame)
 k=0;
 while k<numFrame
     tic;
-    fprintf('Loading %3.0f frames; \n', k)
     currentFrame = min(windowsize, numFrame-k);
+    fprintf('Loading %3.0f frames; \n', currentFrame+k)
     temp=h5read(h5Path,dataset,[1 1 k+flims(1)],[mx my currentFrame]);
     movie=bpFilter2D(temp,options.BandPx(2),options.BandPx(1));
     h5append(options.bpMoviePath, single(movie),options.dataset);

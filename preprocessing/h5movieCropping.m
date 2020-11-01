@@ -10,7 +10,7 @@ options.windowsize=1000;
 options.dataset='mov';
 options.diary=true;
 options.diary_name='diary_crop';
-options.processWholeMovie=false;
+options.processWholeMovie=true;
 
 disps('Starting movie cropping')
 

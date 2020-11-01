@@ -1,4 +1,4 @@
-function [lowF,highF]=findBestFilterParameters(h5Path,varargin)
+function [bpFilter]=findBestFilterParameters(h5Path,varargin)
 disps('Start findBestFilterParameters Function')
 
 meta=h5info(h5Path);
@@ -10,8 +10,8 @@ dataset=strcat(meta.Name,meta.Datasets.Name);
 disps('Uses the last frame by default')
 % use frist is LED switched off at the end
 temp=h5read(h5Path,dataset,[1 1 1],[mx my 1]);
-lowF=10:5:30;% in pixel
-highF=1:5; % in pixel
+lowF=10:5:25;% in pixel
+highF=1:4; % in pixel
 frameBP=zeros(mx,my,length(lowF)*length(highF));
 for iLow=1:length(lowF)
     for iHigh=1:length(highF)
@@ -31,6 +31,8 @@ title('Montage of band-pass filtered images')
 % title('Entropy of each image')
 [lowF,highF]=userFeedback(temp);
 
+bpFilter=[highF lowF];
+
 disps('Success, you found the best band-pass filter parameters')
 
 fprintf('high-low : [%2.0f %2.0f] \n',highF,lowF)
@@ -43,8 +45,8 @@ end
 
 function [lowF,highF]=userFeedback(frame)
 
-low=input('Which low pass (10:5:30)');
-high=input('Which high pass (1:1:5)');
+low=input('Which low pass (10:5:25)');
+high=input('Which high pass (1:1:4)');
 
 figure('Name','Behavioral Metrics','defaultaxesfontsize',16,'color','w')
 temp=bpFilter2D(frame,low,high);

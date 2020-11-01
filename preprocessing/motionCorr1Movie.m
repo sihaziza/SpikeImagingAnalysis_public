@@ -16,21 +16,25 @@ function [mov_corrected,bestCorner]=motionCorr1Movie(h5Path,varargin)
 % - 2020-06-07 14:30:20 - change the order of template determination and prefiltering
 % - 2020-06-09 23:50:25 - add h5 file batch processing support, J.Li
 % - 2020-06-27 02:11:57 - Fixing chunk sized in h5creat 3rd dim - 1 so you can read frame by frame RC
-
-% ISSUES
-% #1 -
-
-% TODO
-% *1 - get the first working version of the function!
+% - 2020-09-30 - make if 1 movie at a time SH
 
 %% OPTIONS
-[options]=defaultOptionsMotionCorr;
-options.windowsize=2000;
+
+options.customTemplate=[]; % just in case you want to use a custom template image it is beyond the specification
+options.customTemplateMethod='corrected';
+options.max_shift=200; % % maximum shift in pixels
+options.us_fac=20; % upsampling factor
+options.windowsize=250;
+options.templateLastFrame=true;
+
+options.verbose=1;
+options.plot=true;
+options.PlotTemplate=true;
+options.dataspace='/mov'; % only '/mov' is supported by normcorre;
 options.dataset='mov';
 options.diary=false;
-options.templateLastFrame=true;
 %% UPDATE OPTIONS
-if nargin>=3
+if nargin>=2
     options=getOptions(options,varargin);
 end
 
@@ -52,6 +56,9 @@ h5Path_original=strrep(h5Path,'_bp.h5','.h5');
 options.mocoMoviePath=strrep(h5Path_original,'.h5','_moco.h5');
 options.mocoMoviePathTemp=strrep(h5Path_original,'.h5','_mocoTEMP.h5');
 
+if exist(options.mocoMoviePath,'file')==2
+    delete(options.mocoMoviePath)
+end
 % numFrame=1000;
 flims=[1 numFrame];% to update if specific frame number required
 
@@ -113,9 +120,9 @@ p=1;
 allCorners=[];
 while k<numFrame
     tic;
-    fprintf('Loading %3.0f frames; ', k)
     
     currentFrame = min(windowsize, numFrame-k);
+    fprintf('Loading %3.0f frames; ', currentFrame+k)
     temp=h5read(h5Path,dataset,[1 1 k+flims(1)],[mx my currentFrame]);
     
     [~,normcorre_shifts] = normcorre_batch(temp,normcorre_options,template);
@@ -168,23 +175,7 @@ while k<numFrame
     toc;
 end
 
-% disps('Generating mp4 movie')
-% renderMovie(-mov_corrected,fullfile(allPaths.pathDiagMotionCorr,'movie'),metadata.fps);
-
-% disps('Saving h5 outputs')
-% h5PathG=strcat(erase(allPaths.h5PathG,'.h5'),[options.suffix '.h5']);
-% h5save(h5PathG,mov_corrected,'mov');
-
-%% convert ncorre_shifts to matrix
-% shifts = zeros(num_frame_fixed, 2);
-% parfor i=1:numel(normcorre_shifts)
-%     shifts(i,:) = [normcorre_shifts(i).shifts(1) normcorre_shifts(i).shifts(2)];
-% end
-
-% summaryMotionCorr.normcorre_shifts=shifts;
-% summaryMotionCorr.function_path=mfilename('fullpath');
-% summaryMotionCorr.execution_duration=toc(summaryMotionCorr.execution_duration);
-% save_summary(summaryMotionCorr,diagnosticFolder);
+delete(options.mocoMoviePathTemp)
 
 if options.diary
     diary off
@@ -196,14 +187,13 @@ end
         end
     end
 
-end  %%% END MOCO2MOVIES
+end
 
 function [cropMovie, corn] = postcropping(movie,corn)
 % crop image to remove boundary values
 % more advanced version, 2019-12-04 by Jizhou Li
 % improved version, 2020-05-14 by Simon Haziza
 % add corn output, 2020-06-07 by Jizhou Li
-% add initilizing corn, 2020-06-09 by Jizhou Li
 
 [movie_pad]=padarray(movie,[1 1],0,'both');
 

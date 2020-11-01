@@ -1,58 +1,40 @@
 function folders_on_path=installSIA()
 % EXAMPLE USE WITH ARGUMENTS
-% folders_on_path=installVIA()
+% folders_on_path=installSIA()
 %
 % This function automatically intall whole "VoltageImagingAnalisis" package by permanently configuring the paths.
 % In the future releases it will also check dependencies for the external packages and programs.
 %
-% HISTORY
-% - 19-04-24 15:55:12 - created by Simon Haziza, originally for BFM
-% - 2019-09-20 11:06:43  adapted for BFM  by RC
-% - 2020-04-18 14:30:05 RC - fixing bug with empty options.FoldersToAdd
-% - 2020-05-22 23:24:16 RC - uzipping some packages if they are not found
-% on the path.
-% - 2020-06-15 17:44:60 RC - removing Biafra and MicroscopesRecordings
-% dependencies
-% - cleaned up display, and removed warnings RC
-% - 2020-06-30 20:58:13 - installing the new structure with all subfolders
-% handled by 'genpath' RC
-% - 2020-07-18 15:05:33 - updated the Folder Lists for the new organization SH
-
+% Imported from Biafra Ahanonou
+% Adapted to VoltageImagingAnalysis by Radek Chrapkiewicz 
+% Adapted to SpikeImagingAnalysis by Simon Haziza
 
 %% OPTIONS (THERE IS NO GET OPTIONS YET, SO YOU CANNOT INPUT THEM YET AS NORMALLY
 options.unzip_quickaccessfunctions=false; % obsolete 06/30/2020 RC
 options.ExternalPackages=false;
-options.FoldersToAdd={'dependencies','preprocessing','packages','utilities'};
-
-%% VARIABLE CHECK
+options.FoldersToAdd={'dependencies','preprocessing','analysis','utilities'};
 
 %% PATHS
-function_path = mfilename('fullpath');
-voltageanalysis_shared_path=fileparts(function_path);
-folder_list=[]; % otherwise it will return an error fi no folcers on the default list
-disps('Installing "VoltageImagingAnalysis" package')
-disps(voltageanalysis_shared_path);
+functionPath = mfilename('fullpath');
+sharedPath=fileparts(functionPath);
+disps('Installing "SpikeImagingAnalysis" package')
+disps(sharedPath);
 
+folderList=[];
 for ii=1:length(options.FoldersToAdd)
     if ii==1
-        folder_list=dir(fullfile(voltageanalysis_shared_path,options.FoldersToAdd{ii}));
+        folderList=dir(fullfile(sharedPath,options.FoldersToAdd{ii}));
     else
-        folder_list=[folder_list;dir(fullfile(voltageanalysis_shared_path,options.FoldersToAdd{ii}))];
-    end
-    
+        folderList=[folderList;dir(fullfile(sharedPath,options.FoldersToAdd{ii}))];
+    end   
 end
 
-
-%% CORE
-%The core of the function should just go here.
-
-addpath(voltageanalysis_shared_path);
-disps(sprintf('Added to the Matlab path the main folder: %s',voltageanalysis_shared_path));
-
+addpath(sharedPath);
+disps(sprintf('Added to the Matlab path the main folder: %s',sharedPath));
 
 disps('Adding to the path subfolders')
-for ii=1:length(folder_list)
-    folder=folder_list(ii).name;
+for ii=1:length(folderList)
+    folder=folderList(ii).name;
     if isfolder(folder) && ~strcmp(folder,'.') && ~strcmp(folder,'..')
         addpath(folder);
         disps(sprintf('Added to the Matlab path : %s and its subfolders',folder));
@@ -60,15 +42,15 @@ for ii=1:length(folder_list)
 end
 
 for ii=1:length(options.FoldersToAdd)
-    addpath(genpath(fullfile(voltageanalysis_shared_path,options.FoldersToAdd{ii})));
-    disps(sprintf('Added to the Matlab path %s',fullfile(voltageanalysis_shared_path,options.FoldersToAdd{ii})));
+    addpath(genpath(fullfile(sharedPath,options.FoldersToAdd{ii})));
+    disps(sprintf('Added to the Matlab path %s',fullfile(sharedPath,options.FoldersToAdd{ii})));
 end
 
+savepath
 
-savepath;
 disps('New folder list saved on path')
 if options.unzip_quickaccessfunctions
-    %% unzipping
+    % unzipping
     disps('Checking if quick access function are on the path')
     if ~exist('quick_access_functions')
         disps('Unzipping quick access functions and adding them to the repo path')
@@ -95,9 +77,7 @@ if strcmpi(answear,'N')
 end
 if strcmpi(answear,'Y')
     disps('Here you go, loading external packages')
-    
-
-    
+ 
     disps('Provide folder for normcorre')
     normcorre_folder=getFolder;
     if normcorre_folder
@@ -110,30 +90,15 @@ end
 
 
 disps('VoltageImagingAnalysis instalation finished')
-folders_on_path=folder_list;
+folders_on_path=folderList;
 
 
 function disps(string) %overloading disp for this function 
-    FUNCTION_NAME='installVIA';
+    FUNCTION_NAME='installSIA';
     fprintf('%s %s: %s\n', datetime('now'),FUNCTION_NAME,string);
 end
 
-end  %%% END INSTALL
-
-function onPath=isOnPath(folder)
-% doesn't seem to work...
-% adapted from
-% https://www.mathworks.com/matlabcentral/answers/86740-how-can-i-determine-if-a-directory-is-on-the-matlab-path-programmatically
-warning('This function doesn''t really seem to work, I am disabling its use')
-onPath=-1;
-return
-pathCell = regexp(path, pathsep, 'split');
-if ispc  % Windows is not case-sensitive
-    onPath = any(strcmpi(folder, pathCell));
-else
-    onPath = any(strcmp(folder, pathCell));
-end
-end
+end  
 
 function [folderpath_out,foldername,formatted_string]=getFolder(varargin)
 % EXAMPLE USE WITH ARGUMENTS

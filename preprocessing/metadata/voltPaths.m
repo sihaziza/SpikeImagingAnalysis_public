@@ -1,9 +1,9 @@
 function [voltage_paths_structure,options]=voltPaths(varargin)
 % EXAMPLE USE WITH ARGUMENTS
-%[voltage_paths_structure,options]= voltPaths() - analyzing and generating
-%the path structure for the parent working directory (pwd)
-%[voltage_paths_structure,options]= voltPaths(folder_path) - use 2, etc.
-%[voltage_paths_structure,options]= voltPaths(folder_path,options) - use 3 with options
+% [voltage_paths_structure,options]= voltPaths() - analyzing and generating
+% the path structure for the parent working directory (pwd)
+% [voltage_paths_structure,options]= voltPaths(folder_path) - use 2, etc.
+% [voltage_paths_structure,options]= voltPaths(folder_path,options) - use 3 with options
 %
 % HELP
 % Generating paths for pipeline for voltage imageing analysis. As an input
@@ -12,20 +12,17 @@ function [voltage_paths_structure,options]=voltPaths(varargin)
 %
 % HISTORY
 % - 20-05-19 15:10:24 - created by Radek Chrapkiewicz (radekch@stanford.edu)
-%
+% - 20-10-02 15:10:24 - updated by Simon Haziza (sihaziza@stanford.edu)
+% 
 % ISSUES
-% #1 - issue 1
+% #1 - 
 %
 % TODO
 % *1 - get the first working version of the function!
 
-
-
-
 %% CONSTANTS (never change, use OPTIONS instead)
 DEBUG_THIS_FILE=false;
 DEFAULT_UNIX_USER='Generic';
-
 
 %% OPTIONS (Biafra style, type 'help getOptions' for details)
 options=struct;
@@ -48,8 +45,6 @@ options.OutputPathsTypes={'DCIMGOriginal','DCIMGTemporary',...
 options.AllowedDrives=horzcat(options.RecordingDrives,options.AnalysisDrive,options.ProcessedStorageDrive,options.ColdStorageDrives); % all drives that are allowe for the analysis
 
 options.AllowedProjectNames={'GEVI_Wave','GEVI_Spike','Calibration'};
-
-
 
 options.ProcessingStages={'Raw','Preprocessed','Analysis'}; % exact spelling of the processing stages to be expected
 
@@ -88,7 +83,7 @@ if ~isfolder(folderpath)
     warning('This folder does not exist, just FYI')
 end
 
-% To deal with data in NAS Tower on the network
+% To deal with data in NAS Tower on the network; 2020-09-27 - SH
 if contains(folderpath,'\\VoltageRaw\DCIMG\')
    folderpath= strrep(folderpath,'\\VoltageRaw\DCIMG\','X:\');
 end
