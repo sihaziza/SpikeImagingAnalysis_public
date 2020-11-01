@@ -1,9 +1,7 @@
 # SpikeImagingAnalysis
-Software for analysis of voltage imaging data acquired by BFM- relevant for dual-color and or dual-polarity in vivo spike recordings
+Software to analyze single color, dual-color and dual-polarity in vivo spike imaging.
 
-# Updates
-- 2020-10-27 - creation of the SpikeImagingAnalysis repository by Simon Haziza, based off of the VoltageImagingAnalysis developed by 
-Radek Chrapkievicz, Jizhou Li and Simon Haziza.
+Run `installSIA.m` to install all relevant folders for a functionnal package.
 
 # Structure of this repository
 ## Philosophy of the structure:
@@ -13,11 +11,8 @@ are super frequently used or don't logicially belong to any of the name spaces.
 - They may be part of packages with a specific name space such as `+unmixing.standarize`
 - they may be Static methods of some parent master class.
 ## To avoid:
-- We should be avoiding putting functions in subfolders that should be added manually to the path. 
-- We can do it further down the road, but it should come with the `installBFM.m` function that will do it 
-automatically when someone will be installing the whole package.
+- putting functions in subfolders that should be added manually to the path. 
 - adding all the subfolders to the path is a bad practice. 
-It often ends up with getting the .git function there too...
 
 # Naming convention
 
@@ -40,6 +35,7 @@ folders with "@" prefix
 ## Rules for new functions
 - Use functionTemplateSIA to generate new functions,
 - Clear description in the Help section with some examples,
-- Author (who to ask for more information and debugging).
 
-
+# Updates
+- 2020-11-01 - creation of the SpikeImagingAnalysis repository by Simon Haziza, based off of the VoltageImagingAnalysis developed by 
+Radek Chrapkievicz, Jizhou Li and Simon Haziza. 
