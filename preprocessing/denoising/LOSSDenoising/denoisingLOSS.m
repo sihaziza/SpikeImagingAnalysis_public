@@ -20,15 +20,15 @@ function [movie_out,E_out, Info] = denoisingLOSS(movie_in, varargin)
 % TODO
 % *1 -Options
 
-addpath('utilities');
+% addpath('utilities');
 
 options.windowsize = 1000;
 options.prereg = 0;
 options.postreg = 0;
 options.rescale = 0;
 options.regMethod = "normcorre"; % matlab OR normcorre
-options.useGPU = 0
-options.ranks = 40;
+options.useGPU = 0;
+options.ranks = 50;
 options.lambda = 0.2;
 options.tau = 0.2;
 options.gridsize = -1;

@@ -23,7 +23,7 @@ function bandPassMovieChunk(h5Path,bpFilter,varargin)
 % if nargin>=4
 %     options=getOptions(options,varargin);
 % end
-options.windowsize=300;
+options.windowsize=1000;
 options.dataset='mov';
 options.BandPx=bpFilter;
 options.verbose=true;

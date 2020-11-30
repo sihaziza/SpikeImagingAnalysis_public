@@ -24,7 +24,7 @@ options.customTemplate=[]; % just in case you want to use a custom template imag
 options.customTemplateMethod='corrected';
 options.max_shift=200; % % maximum shift in pixels
 options.us_fac=20; % upsampling factor
-options.windowsize=250;
+options.windowsize=1000;
 options.templateLastFrame=true;
 
 options.verbose=1;

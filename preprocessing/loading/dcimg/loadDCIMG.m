@@ -32,7 +32,7 @@ function [movie,totalframes,summary]=loadDCIMG(filepath,varargin)
 %% OPTIONS
 options.resize=false; % down sample spatially the file while loading? It speeds up loading especially combined with a parallel pool
 options.parallel=true; % for parallel computing
-options.scale_factor=1/2; % default scale factor for spatial downsampling (binning).
+options.scale_factor=1; % default: no binning (scale factor for spatial downsampling (binning).
 options.type='single'; % 'uint16', 'double' - changing data type of the output movie but ONLY if you bin it spatially.
 
 % display options
@@ -93,13 +93,14 @@ if options.verbose; fprintf('\n'); disps('Start'); end
 % loading first frame
 disps('Loading first frame and file info.')
 [framedata,totalframes]=  dcimgmatlab(startframe, filepath); % that's the mex file that should be on a path
+framedata=cast(framedata,options.type); % cast typing to preserve more information upon averaging
 
 if options.transpose
     framedata=framedata'; % this transposition is to make it compatible with imshow, but flips camera rows with columns
     % adding to summary file size information
 end
 
-% adding frame info to the summary at this point 
+% adding frame info to the summary at this point
 frame_info=whos('framedata');
 summary.totalframes=totalframes;
 summary.frame_size_original=size(framedata);
@@ -152,15 +153,12 @@ end
 
 sizeFrame=size(framedata);
 
-% Preallocate the array
-movie = zeros(sizeFrame(1),sizeFrame(2),numFrames, class(framedata));
-movie(:,:,1) = framedata;
-progress=0;
-
-%% main loading loop
-frameidx=0;
-
-%%% parallel loading
+% % Preallocate the array
+% movie = zeros(sizeFrame(1),sizeFrame(2),numFrames, class(framedata));
+% movie(:,:,1) = framedata;
+movie=[];
+%% parallel loading
+dataType=options.type;
 if options.parallel % for parallel computing
     
     disps('Starting loading DCIMG using PARALLEL mode (no progress will be reported).')
@@ -176,18 +174,23 @@ if options.parallel % for parallel computing
     parfor ii=int32(1:numFrames) % indexing starts from 0 for the mex file!!!
         % Read each frame into the appropriate frame in memory.
         [framedata,~]=  dcimgmatlab(ii+startframe-1, filepath);
+        framedata=cast(framedata,dataType); % cast typing to preserve more information upon averaging
         
         if options.transpose
             framedata=framedata';
         end
         
         if options.resize && options.scale_factor~=1
-            framedata=cast(framedata,options.type); % cast typing to preserve more information upon averaging
             framedata=imresize(framedata,options.scale_factor,'box'); % this suprisingly gives speed up !
         end
-        
+%         imshow(framedata,[])
         % Done after imresize > ROI detected after resizing
         if ~isempty(options.cropROI)
+            % detect if red channel > to flip it to be in the same ref as
+            % green channel - SH 20201129
+            if strfind(filepath,'cR.dcimg')>0
+            framedata=fliplr(framedata);
+            end
             % ORCA and matlab different XY convention
             framedata = imcrop(framedata, options.cropROI);
         end
@@ -196,50 +199,14 @@ if options.parallel % for parallel computing
     end
     disps('File loaded')
 else
-    
-    %%% sequential loading
-    
-    disps('Starting loading DCIMG using sequential mode')
-    disps(sprintf('Progress loading %d frames: ',endframe-startframe)); if options.verbose; fprintf('\b'); end
-    refresh_idx=0;
-    for frame=(startframe+1):endframe % indexing starts from 0 for the mex file!!!
-        frameidx=frameidx+1;
-        progress=double(frameidx)/double(numFrames);
-        
-        if rem(round(progress*100),5)==0
-            refresh_idx=refresh_idx+1;
-            if options.waitbar
-                waitbar(progress,hWaitBar,'Loading DCIMG file     ');
-            end
-            if refresh_idx==1
-                fprintf('%3d%%\n',round(progress*100))
-            else
-                fprintf('\b\b\b\b\b%3d%%\n',round(progress*100))
-            end
-        end
-        
-        % Read each frame into the appropriate frame in memory.
-        [framedata,~]=  dcimgmatlab(frame, filepath);
-        if options.transpose
-            framedata=framedata'; % transposing is needed for imshow orientation compatibility
-        end
-        
-        if options.resize && options.scale_factor~=1
-            framedata=cast(framedata,options.type); % cast typing to preserve more information upon averaging
-            framedata=imresize(framedata,options.scale_factor,'box'); % this suprisingly gives speed up !
-        end
-        movie(:,:,frameidx+1)  = framedata; % for chunks loading it has to be frameidx not frame
-    end
-    if options.verbose; fprintf('\b'); end
-    
-    
+  disps('did not load without parfor...')  
 end %% end choose if sequential of parallel
 %%%%%%%%%%%%%%%%%%%
 
 disps(sprintf('Loading DCIMG finished: %s',filepath));
 
 %% Clearing MEX to immediately release RAM
-clear mex; 
+clear mex;
 
     function disps(string) %overloading disp for this function - this function should be nested
         FUNCTION_NAME='loadDCIMG';

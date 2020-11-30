@@ -79,7 +79,7 @@ if ~dataset_ind % dataset does not exist
     h5create(filename,dataset_name,[frame_size, Inf],'Datatype',class(movie),'ChunkSize',options.ChunkSize);
     h5write(filename, dataset_name, movie, [1,1,1], movie_size); % movie size needs to have 3 elements RC
 else
-    disp('Dataset already exists, appedning')
+    disp('Dataset already exists, appending')
     [dataset_ind,info_h5]=exist_dataset(filename,dataset_name);
     h5currentsize=info_h5.Datasets(dataset_ind).Dataspace.Size;
     h5write(filename,dataset_name, movie,[1,1,h5currentsize(3)+1],movie_size); % movie size needs to have 3 elements RC

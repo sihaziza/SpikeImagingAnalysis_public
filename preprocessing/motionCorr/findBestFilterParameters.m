@@ -1,29 +1,42 @@
-function [bpFilter]=findBestFilterParameters(h5Path,varargin)
+function [bpFilter]=findBestFilterParameters(filePath)
 disps('Start findBestFilterParameters Function')
+% 
+% m=load(allPaths.metadataPath);
+% metadata=m.metadata;
 
-meta=h5info(h5Path);
-disp('h5 file detected')
-dim=meta.Datasets.Dataspace.Size;
-mx=dim(1);my=dim(2);numFrame=dim(3);
-dataset=strcat(meta.Name,meta.Datasets.Name);
+[~,~,ext]=fileparts(filePath);
 
-disps('Uses the last frame by default')
-% use frist is LED switched off at the end
-temp=h5read(h5Path,dataset,[1 1 1],[mx my 1]);
-lowF=10:5:25;% in pixel
-highF=1:4; % in pixel
+if strcmpi(ext,'.h5')    
+    meta=h5info(filePath);
+    disp('h5 file detected')
+    dim=meta.Datasets.Dataspace.Size;
+    mx=dim(1);my=dim(2);numFrame=dim(3);
+    dataset=strcat(meta.Name,meta.Datasets.Name);
+    
+    disps('Uses the last frame by default')
+    % use frist is LED switched off at the end
+    temp=h5read(filePath,dataset,[1 1 dim(3)-100],[mx my 100]);    
+elseif strcmpi(ext,'.dcimg')
+    [temp,~,~]=loadDCIMG(filePath,[100 200],'parallel',1,'verbose',0,'imshow',0);%,...
+%         'resize',false,'scale_factor',1/metadata.softwareBinning,);   
+else
+    error('only dcimg and h5 accepted here')
+end
+
+lowF=10:10:50;% in pixel
+highF=1:2:9; % in pixel
 frameBP=zeros(mx,my,length(lowF)*length(highF));
 for iLow=1:length(lowF)
     for iHigh=1:length(highF)
-        frameBP(:,:,length(lowF)*(iLow-1)+iHigh)=bpFilter2D(temp,lowF(iLow),highF(iHigh));
+        frameBP(:,:,length(lowF)*(iLow-1)+iHigh)=bpFilter2D(temp,lowF(iLow),highF(iHigh),'parallel',false);
         %         e(iLow,iHigh) = entropy(frameBP(:,:,length(lowF)*(iLow-1)+iHigh));
     end
 end
 
 figure('Name','Behavioral Metrics','defaultaxesfontsize',16,'color','w')
 montage(frameBP,'Size', [length(lowF) length(highF)],'DisplayRange', [],'BorderSize',[2 2] );
-xlabel('High-Pass from 1pix -> 5pix - step 1')
-ylabel('Low-Pass from 30 pix <- 10 pix - step 5')
+xlabel('High-Pass from 1pix -> 9pix - step 2')
+ylabel('Low-Pass from 50 pix <- 10 pix - step 10')
 title('Montage of band-pass filtered images')
 
 %    subplot(2,1,2)
@@ -49,7 +62,7 @@ low=input('Which low pass (10:5:25)');
 high=input('Which high pass (1:1:4)');
 
 figure('Name','Behavioral Metrics','defaultaxesfontsize',16,'color','w')
-temp=bpFilter2D(frame,low,high);
+temp=bpFilter2D(frame,low,high,'parallel',false);
 imshow(temp,[])
 
 answer=input('Are you happy with your choice? (0-No / 1-Yes)');

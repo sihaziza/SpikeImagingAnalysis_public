@@ -18,7 +18,7 @@ dcimgPath='C:\Users\Simon\Desktop\GitHub\SpikeImagingAnalysis\demo\1color';
 [allPaths]=setExportPath(dcimgPath);
 
 %% GENERATING ALL METADATA
-[metadata]=getRawMetadata(allPaths,'softwareBinning',2);
+[metadata]=getRawMetadata(allPaths,'softwareBinning',1);
 
 %% LOAD AND CONVERT .dcimg RAW MOVIE
 loading(allPaths,'frameRange',[100 inf]);

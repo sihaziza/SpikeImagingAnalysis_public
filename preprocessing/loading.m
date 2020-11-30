@@ -50,20 +50,16 @@ end
 %% CONVERT DCIMG to H5 files
 disps('Starting conversion of two DCIMG to H5 files');
 
-if isempty(options.cropROI)
-    options.cropROI.greenChannel=[];
-    options.cropROI.redChannel=[];
-end
-
 temp=load(allPaths.metadataPath);
-metadata=temp.metadata;
+metadata=temp.metadata; clear temp;
+
 % if metadata.chunking
 disps('Loading data in chunks')
 % Loading green channel
-loadDCIMGchunks(allPaths.dcimgPathG,...
+[~,movieG,~]= loadDCIMGchunks(allPaths.dcimgPathG,...
     'binning',metadata.softwareBinning,...
-    'cropROI',options.cropROI.greenChannel,...
-    'frameRange',options.frameRange,...
+    'cropROI',metadata.ROI,...
+    'frameRange',metadata.frameRange,...
     'h5Path',allPaths.h5PathG);
 
 if ~isfile(allPaths.h5PathG)
@@ -74,17 +70,41 @@ disps('One movie loaded')
 
 if ~isempty(allPaths.dcimgPathR)
     % Loading red channel
-    loadDCIMGchunks(allPaths.dcimgPathR,...
-        'binning',options.binning,...
-        'cropROI',options.cropROI.redChannel,...
-        'frameRange',options.frameRange,...
+   [~,movieR,~]= loadDCIMGchunks(allPaths.dcimgPathR,...
+        'binning',metadata.softwareBinning,...
+        'cropROI',metadata.ROI,...
+        'frameRange',metadata.frameRange,...
         'h5Path',allPaths.h5PathR);
     
     if ~isfile(allPaths.h5PathR)
         error('H5 conversion failed')
     end
-    disps('Second movie loaded')    
+    disps('Second movie loaded')
 end
+
+    tempG=mean(movieG,3);
+    tempG=bpFilter2D(tempG,metadata.vectorBandPassFilter(2),metadata.vectorBandPassFilter(1),'parallel',false);
+    tempG=tempG-min(tempG,[],'all');
+
+    tempR=mean(movieR,3);
+    tempR=bpFilter2D(tempR,metadata.vectorBandPassFilter(2),metadata.vectorBandPassFilter(1),'parallel',false);
+    tempR=tempR-min(tempR,[],'all');
+
+figHandle=figure(1);
+subplot(221)
+imshow(tempG,[])
+title('Green Channel')
+subplot(222)
+imshow(tempR,[])
+title('Red Channel')
+subplot(212)
+imshowpair(tempG,tempR)
+title('Merged')
+
+            if ~isempty(figHandle)
+                savePDF(figHandle,'mean images of loaded movies',allPaths.pathDiagLoading)
+                close;
+            end
 % else
 %        disps('Loading data into RAM')
 %

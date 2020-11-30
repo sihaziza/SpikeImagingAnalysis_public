@@ -1,4 +1,4 @@
-function [movie,summary]=loadDCIMGchunks(filePath,varargin)
+function [movie,movie_batch,summary]=loadDCIMGchunks(filePath,varargin)
 % Loading DCIMG in chunks, clearing mex buffer inbetween chunk loading.
 % This function makes sense when you want to resize the file on the fly
 % while loading. Otherwise, there is no memory benefit. Loding to H5
@@ -18,6 +18,7 @@ function [movie,summary]=loadDCIMGchunks(filePath,varargin)
 %
 % OUTPUTS:
 % - movie - loaded movie or path to h5 file
+% - movie_batch - chunk of the loaded movie to quickly assess mistakes
 % - summary - structure containing an internal configuration
 % of the function that includes all input options as well as the imporant parameters characterizing the function configuration, performance and execution.
 %
@@ -98,7 +99,7 @@ if ~isempty(options.chunkSize)
     summary.chunkSize=options.chunkSize;
     summary.availableRAM=[]; % not checking the RAM at all, hopefully user knows what he is doing
 else
-    summary.chunkSize=500;
+    summary.chunkSize=1000;
 end
 
 
@@ -117,9 +118,9 @@ if ~isempty(options.h5Path)
     
     for ichunk=1:size(chunksFirstLast,1) % this should be regular for loop as the inside DCIMG loading might be parallel already
         [movie_batch,~,~]=loadDCIMG(filePath,chunksFirstLast(ichunk,:),'resize',true,'scale_factor',options.scale_factor,...
-            'parallel',options.parallel,'verbose',0,'imshow',options.imshow);
+             'cropROI',options.cropROI,'parallel',options.parallel,'verbose',0,'imshow',options.imshow);
         
-        h5append(h5Path, movie_batch, options.dataset); % and that's enough an covers creation too. Don't convert to single yet. RC
+        h5append(h5Path, single(movie_batch), options.dataset); % and that's enough an covers creation too. Don't convert to single yet. RC
         
     end
     
@@ -132,9 +133,9 @@ else
     nframes_loaded=0;
     for ichunk=1:size(chunksFirstLast,1) % this should be regular for loop as the inside DCIMG loading might be parallel already
         [movie_batch,~,~]=loadDCIMG(filePath,chunksFirstLast(ichunk,:),'resize',true,'scale_factor',options.scale_factor,...
-            'parallel',options.parallel,'verbose',0,'imshow',options.imshow);
+            'cropROI',options.cropROI,'parallel',options.parallel,'verbose',0,'imshow',options.imshow);
         
-        movie(:,:,nframes_loaded+(1:size(movie_batch,3)))=movie_batch;
+        movie(:,:,nframes_loaded+(1:size(movie_batch,3)))=single(movie_batch);
         nframes_loaded=nframes_loaded+size(movie_batch,3);
     end
     

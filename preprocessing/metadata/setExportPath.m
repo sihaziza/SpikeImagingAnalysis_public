@@ -23,6 +23,7 @@ options.pathDiagRegistration=[];
 options.pathDiagMotionCorr=[];
 options.pathDiagDenoising=[];
 options.pathDiagUnmixing=[];
+options.pathDiagDemixing=[];
 options.pathDiagBehavior=[];
 options.verbose=true;
 
@@ -32,13 +33,22 @@ disp('Creating paths')
 % Find Green & Red DCIMG files
 fileName=dir(fullfile(dcimgPath, '*.dcimg')); % G always comes before R
 
-if size(fileName.name,1)==2
+if size(fileName,1)==2
     [fileNameG, fileNameR]=fileName.name; % for saving other outputs
     options.dcimgPathG=fullfile(dcimgPath,fileNameG);
     options.dcimgPathR=fullfile(dcimgPath,fileNameR);
+elseif size(fileName,1)==1
+    if ~isempty(strfind(allPaths.dcimgPathG,'cG.dcimg'))
+        [fileNameG]=fileName.name;
+        options.dcimgPathG=fullfile(dcimgPath,fileNameG);
+        options.dcimgPathR=[];
+    else
+        [fileNameR]=fileName.name;
+        options.dcimgPathG=[];
+        options.dcimgPathR=fullfile(dcimgPath,fileNameR);
+    end
 else
-    [fileNameG]=fileName.name;
-    options.dcimgPathG=fullfile(dcimgPath,fileNameG);
+    error('Oups... no dcimg file detected');
 end
 
 % Checking if we are on the right path and determining the output path
@@ -106,7 +116,7 @@ if options.behavior && ~isfolder(options.pathDiagBehavior)
 end
 
 %% Set and Check for h5 file
-if length(fileName.name)==2
+if size(fileName,1)==2
     options.h5PathG=fullfile(folderExport,strrep(fileNameG,'.dcimg','.h5'));
     options.h5PathR=fullfile(folderExport,strrep(fileNameR,'.dcimg','.h5'));
     if isfile(options.h5PathG)
