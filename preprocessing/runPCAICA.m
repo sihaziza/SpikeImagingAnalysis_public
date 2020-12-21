@@ -46,7 +46,7 @@ end
 [mixedsig, mixedfilters, CovEvals] = CellsortPCA(h5Path,...
                                     options.frameRange, [], [], outputdir);
 
-PCuse=1:40; % always removes the first component, usually background.
+PCuse=20:100; % always removes the first component, usually background.
 h=figure('defaultaxesfontsize',16,'color','w');
 CellsortPlotPCspectrum(h5Path, CovEvals, PCuse);
 if options.plotFigure
@@ -54,7 +54,7 @@ if options.plotFigure
 end
 
 % Step 3a: CellsortICA
-mu=0.95; nIC=10;
+mu=0.99; nIC=50;
 [ica_sig, ica_filters] = CellsortICA(mixedsig, mixedfilters,...
                         CovEvals, PCuse, mu, nIC);
 

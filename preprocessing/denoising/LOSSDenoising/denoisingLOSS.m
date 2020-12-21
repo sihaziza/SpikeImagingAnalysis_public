@@ -28,9 +28,9 @@ options.postreg = 0;
 options.rescale = 0;
 options.regMethod = "normcorre"; % matlab OR normcorre
 options.useGPU = 0;
-options.ranks = 50;
-options.lambda = 0.2;
-options.tau = 0.2;
+options.ranks = 40;
+options.lambda = 0.05;
+options.tau = 0.05;
 options.gridsize = -1;
 options.noSpatial = false;
 

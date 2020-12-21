@@ -22,10 +22,11 @@ function [mov_corrected,bestCorner]=motionCorr1Movie(h5Path,varargin)
 
 options.customTemplate=[]; % just in case you want to use a custom template image it is beyond the specification
 options.customTemplateMethod='corrected';
-options.max_shift=200; % % maximum shift in pixels
+options.max_shift=50; % % maximum shift in pixels
 options.us_fac=20; % upsampling factor
 options.windowsize=1000;
 options.templateLastFrame=true;
+options.nonRigid=false;
 
 options.verbose=1;
 options.plot=true;
@@ -53,7 +54,7 @@ dim=meta.Datasets.Dataspace.Size;
 mx=dim(1);my=dim(2);numFrame=dim(3);
 dataset=strcat(meta.Name,meta.Datasets.Name);
 h5Path_original=strrep(h5Path,'_bp.h5','.h5');
-options.mocoMoviePath=strrep(h5Path_original,'.h5','_moco.h5');
+options.mocoMoviePath=strrep(h5Path_original,'.h5','_moco2.h5');
 options.mocoMoviePathTemp=strrep(h5Path_original,'.h5','_mocoTEMP.h5');
 
 if exist(options.mocoMoviePath,'file')==2
@@ -111,8 +112,19 @@ imshow(template,[])
 
 disps('Start Motion Correction Function')
 
-normcorre_options = NoRMCorreSetParms('d1',mx,'d2',my,'max_shift',options.max_shift,...
-    'us_fac',options.us_fac,'correct_bidir',false,'upd_template',false,'boundary','nan','shifts_method','cubic');
+if options.nonRigid
+    gridD=max(round(min(mx,my)/3),20);
+    normcorre_options = NoRMCorreSetParms('d1',mx,'d2',my,...
+    'grid_size',round([gridD,gridD,1]),'overlap_pre',round([gridD/2,gridD/2,1]),...
+    'min_patch_size',round([gridD/2,gridD/2,1]),'min_diff',round([gridD/4,gridD/4,1]),... 
+    'max_shift',options.max_shift,'correct_bidir',false,...
+    'upd_template',false,'boundary','nan','shifts_method','fft');
+
+else
+ normcorre_options = NoRMCorreSetParms('d1',mx,'d2',my,'max_shift',options.max_shift,...
+    'correct_bidir',false,'upd_template',false,'boundary','nan','shifts_method','cubic');   
+end
+
 
 fprintf('Loading and processing %5g frames in chunks.\n', numFrame)
 k=0;
