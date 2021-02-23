@@ -44,7 +44,7 @@ options.OutputPathsTypes={'DCIMGOriginal','DCIMGTemporary',...
 
 options.AllowedDrives=horzcat(options.RecordingDrives,options.AnalysisDrive,options.ProcessedStorageDrive,options.ColdStorageDrives); % all drives that are allowe for the analysis
 
-options.AllowedProjectNames={'GEVI_Wave','GEVI_Spike','Calibration'};
+options.AllowedProjectNames={'GEVI_Wave','GEVI_Spike','Calibration','GECI'};
 
 options.ProcessingStages={'Raw','Preprocessed','Analysis'}; % exact spelling of the processing stages to be expected
 

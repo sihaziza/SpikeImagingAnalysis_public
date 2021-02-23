@@ -54,7 +54,7 @@ dim=meta.Datasets.Dataspace.Size;
 mx=dim(1);my=dim(2);numFrame=dim(3);
 dataset=strcat(meta.Name,meta.Datasets.Name);
 h5Path_original=strrep(h5Path,'_bp.h5','.h5');
-options.mocoMoviePath=strrep(h5Path_original,'.h5','_moco2.h5');
+options.mocoMoviePath=strrep(h5Path_original,'.h5','_moco.h5');
 options.mocoMoviePathTemp=strrep(h5Path_original,'.h5','_mocoTEMP.h5');
 
 if exist(options.mocoMoviePath,'file')==2
@@ -113,12 +113,14 @@ imshow(template,[])
 disps('Start Motion Correction Function')
 
 if options.nonRigid
-    gridD=max(round(min(mx,my)/3),20);
+    disps('Running Non-Rigid Moco')
+%     gridD=max(round(min(mx,my)/5),20);
+    gridD=10; %test with a patch of 10x10 pixels
     normcorre_options = NoRMCorreSetParms('d1',mx,'d2',my,...
     'grid_size',round([gridD,gridD,1]),'overlap_pre',round([gridD/2,gridD/2,1]),...
     'min_patch_size',round([gridD/2,gridD/2,1]),'min_diff',round([gridD/4,gridD/4,1]),... 
     'max_shift',options.max_shift,'correct_bidir',false,...
-    'upd_template',false,'boundary','nan','shifts_method','fft');
+    'upd_template',false,'boundary','nan','shifts_method','cubic');
 
 else
  normcorre_options = NoRMCorreSetParms('d1',mx,'d2',my,'max_shift',options.max_shift,...

@@ -12,6 +12,7 @@ options.windowsize=1000;
 options.templateLastFrame=true;
 options.nonRigid=false;
 options.spatialChunk=false;
+options.methods='lowpass';
 
 options.verbose=1;
 options.plot=true;
@@ -75,7 +76,8 @@ if options.spatialChunk
 % end
 % 
 % clear temp
-else    
+else  
+
    data=h5read(h5Path,dataset,[1 1 1],[mx my nFrame]);
    [dataCorr]=runPhotoBleachingRemoval(data);
    h5append(options.detrendMoviePath, single(dataCorr),options.dataset);

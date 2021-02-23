@@ -15,6 +15,9 @@ function [fitresult, gof,output] = createFitExp(input)
 plotFigure=0;
 
 input=double(input);
+if size(input,1)>size(input,2)
+   input=input'; 
+end
 
 [xData, yData] = prepareCurveData( [], input );
 

@@ -1,4 +1,4 @@
-function CellsortPlotPCspectrum(fn, CovEvals, PCuse)
+function [suggestedPCuse]=CellsortPlotPCspectrum(fn, CovEvals, PCuse)
 % CellsortPlotPCspectrum(fn, CovEvals, PCuse)
 %
 % Plot the principal component (PC) spectrum and compare with the
@@ -54,6 +54,8 @@ noiseigs = interp1(rhocdf, lambda, [p:-1:1]'/p, 'linear', 'extrap').^2 ;
 % Normalize the PC spectrum
 normrank = min(nt-1,length(CovEvals));
 pca_norm = CovEvals*noiseigs(normrank) / (CovEvals(normrank)*noiseigs(1));
+k=find(pca_norm>max(2*noiseigs / noiseigs(1)),1,'last');
+suggestedPCuse=1:k;
 
 clf
 plot(pca_norm, 'o-', 'Color', [1,1,1]*0.3, 'MarkerFaceColor', [1,1,1]*0.3, 'LineWidth',2)
@@ -63,6 +65,7 @@ plot(2*noiseigs / noiseigs(1), 'b--', 'LineWidth',2)
 if ~isempty(PCuse)
     plot(PCuse, pca_norm(PCuse), 'rs', 'LineWidth',2)
 end
+plot(suggestedPCuse, pca_norm(suggestedPCuse), 'gs', 'LineWidth',2)
 hold off
 formataxes
 set(gca,'XScale','log','YScale','log', 'Color','none')
@@ -72,7 +75,7 @@ axis tight
 if isempty(PCuse)
     legend('Data variance','Noise floor','2 x Noise floor')
 else
-    legend('Data variance','Noise floor','2 x Noise floor','Retained PCs')
+    legend('Data variance','Noise floor','2 x Noise floor','Retained PCs','Suggested PCs')
 end
 
 [~,name,ext] = fileparts(fn);
@@ -80,11 +83,14 @@ fntitle = strcat(name,ext);
 % fntitle(fn=='_') = ' ';
 title(fntitle)
 
+end
+
 function formataxes
 
 set(gca,'FontSize',12,'FontWeight','bold','FontName','Helvetica','LineWidth',2,'TickLength',[1,1]*.02,'tickdir','out')
 set(gcf,'Color','w','PaperPositionMode','auto')
 
+end
 
 function j = tiff_frames(fn)
 %
@@ -95,3 +101,4 @@ function j = tiff_frames(fn)
 % Modified April 9, 2013 for compatibility with MATLAB 2012b
 
 j = length(imfinfo(fn));
+end

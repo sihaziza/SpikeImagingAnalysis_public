@@ -45,24 +45,54 @@ end
 
 [mixedsig, mixedfilters, CovEvals] = CellsortPCA(h5Path,...
                                     options.frameRange, [], [], outputdir);
-
-PCuse=20:100; % always removes the first component, usually background.
+% montage(mixedfilters)
+PCuse=1:10; % always removes the first component, usually background.
 h=figure('defaultaxesfontsize',16,'color','w');
-CellsortPlotPCspectrum(h5Path, CovEvals, PCuse);
+[suggestedPCuse]=CellsortPlotPCspectrum(h5Path, CovEvals, PCuse);
 if options.plotFigure
     savePDF(h,'Cellsort Plot PC spectrum',outputdir);%close;
 end
-
+%%
 % Step 3a: CellsortICA
-mu=0.99; nIC=50;
+% mu=0.99; 
+nIC=10;
+mu=0.99;
+% for i=1:length(mu)
 [ica_sig, ica_filters] = CellsortICA(mixedsig, mixedfilters,...
                         CovEvals, PCuse, mu, nIC);
 
+% filterT(:,:,i)=ica_sig;        
+% filterS(:,:,:,i)=ica_filters;                    
+% 
+% end
+% 
+% t=linspace(0,(size(filterT,2)-1)/Fs,size(filterT,2));
+% 
+% ica_sig=[zscore(squeeze(filterT(1,:,end-1))); zscore(squeeze(filterT(2,:,end-1)))];
+% plot(t,ica_sig)
+% 
+% figure(1)
+% subplot(1,2,1)
+% plot(t,zscore(squeeze(filterT(1,:,:)))-linspace(0,5*length(mu),length(mu)))
+% subplot(1,2,2)
+% plot(t,zscore(squeeze(filterT(2,:,:)))-linspace(0,5*length(mu),length(mu)))
+% ica_sig=double(zscore(squeeze(filterT(1,:,50))));
+% plotPSD(ica_sig','FreqBand',[0.1 250],'FrameRate',Fs,'Window',0.5);
+% ica_sig=[];
+% for i=30:51
+% try
+%     ica_sig=[ica_sig; squeeze(double(filterS(2,:,:,i)))];
+% end
+% end
+% ica_sig=[squeeze(double(filterS(1,:,:,30:51))) squeeze(double(filterS(2,:,:,30:51)))];
+% implay(mat2gray(ica_sig))
+
+                    
 % Step 3b: CellsortICAplot
 % load first 100 frames to compute average frame
-movie=h5read(h5Path,dataset,[1 1 1],[mx my 100]);
+movie=h5read(h5Path,dataset,[1 1 1],[mx my 1000]);
 MEAN_PROJECTION=mean(movie,3)';
-f0=bpFilter2D(MEAN_PROJECTION,20,2,'parallel',false);
+f0=bpFilter2D(MEAN_PROJECTION,25,1,'parallel',false);
 f0=f0';
 
 if options.plotFigure
@@ -72,16 +102,24 @@ if options.plotFigure
     savePDF(h,'Average Intensity - bandpassed',outputdir);%close;
 end
 
-nUnits=nIC; % look at the first 10 ICs
+% nUnits=nIC; % look at the first 10 ICs
 mode='contour';
 dt=1/Fs;
 h=figure('defaultaxesfontsize',16,'color','w');
-CellsortICAplot(mode, ica_filters(1:nUnits,:,:), ica_sig(1:nUnits,:), f0, [], dt) ;
+CellsortICAplot(mode, ica_filters, ica_sig, f0, [], dt) ;
 
 if options.plotFigure
     savePDF(h,'ICAplot Template',outputdir);%close;
 end
 
+%%
+% 
+% smwidth=1;
+% thresh=1;
+% arealims=[50 500];
+% plotting=1;
+
+% [ica_segments, segmentlabel, segcentroid] = CellsortSegmentation(ica_filters,1,1,[250 500],1);%, smwidth, thresh, arealims, plotting);
 %%
 
 savePath=fullfile(outputdir,strcat(fname,'_unitsPCAICA.mat'));

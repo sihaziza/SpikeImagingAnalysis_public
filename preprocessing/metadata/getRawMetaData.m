@@ -3,6 +3,7 @@ function [metadata]=getRawMetadata(allPaths,varargin)
 % [metadata]=getMetaData(folderpath,'parameter',value,...)
 %
 % Created by Simon Haziza & Radek Chrapkiewicz, Stanford University, 2019
+% To Do > save the file name as well. Usefull for downstream analysis
 
 %% SET ALL OPTIONS
 [options]=metadataStructure();
@@ -104,6 +105,7 @@ if metadata.loadTTL
         Nametemp=dir(fullfile(allPaths.dcimgPath,'*_framestamps 0.txt'));
         [TTL]=importdata(fullfile(Nametemp.folder,Nametemp.name));
         metadata.TTL=TTL.data(metadata.frameRange(1):metadata.frameRange(2),4);
+        metadata.Locomotion=TTL.data(metadata.frameRange(1):metadata.frameRange(2),2);
     catch
         warning('Cannot detect TTL file');
     end
@@ -140,6 +142,9 @@ if ~isempty(metadata.croppingMethod)
             metadata.ROI=imcropRect;
             metadata.loadedDimension=[h5cropIndex.Count(2) h5cropIndex.Count(1) diff(metadata.frameRange)+1];
             metadata.loadedFileSize=prod(metadata.loadedDimension)*16/8/(1024)^3;
+        case 'center'
+            % ROI is a square of size 100 pixels / could be tuned by user
+            metadata.ROI=[round(metadata.rawDimension(1)/2)-51 round(metadata.rawDimension(2)/2)-51 100 100];
         otherwise
         disp('Method not recognized. Ignoring cropping - auto or manual only');
     end
@@ -151,7 +156,7 @@ if metadata.findBestFilter
 [bpFilter]=findBestFilterParameters(allPaths.dcimgPathG);
 metadata.vectorBandPassFilter=bpFilter;
 else
-metadata.vectorBandPassFilter=[2 20];
+metadata.vectorBandPassFilter=[2 50];
 end
 
 % save again to update the file 

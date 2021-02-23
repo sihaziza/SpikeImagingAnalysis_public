@@ -15,10 +15,15 @@ if strcmpi(ext,'.h5')
     
     disps('Uses the last frame by default')
     % use frist is LED switched off at the end
-    temp=h5read(filePath,dataset,[1 1 dim(3)-100],[mx my 100]);    
+    temp=h5read(filePath,dataset,[1 1 dim(3)-100],[mx my 100]); 
+    temp=mean(temp,3);
 elseif strcmpi(ext,'.dcimg')
-    [temp,~,~]=loadDCIMG(filePath,[100 200],'parallel',1,'verbose',0,'imshow',0);%,...
+    [temp,~,~]=loadDCIMG(filePath,[100 199],'parallel',1,'verbose',0,'imshow',0);%,...
 %         'resize',false,'scale_factor',1/metadata.softwareBinning,);   
+    temp=mean(temp,3);
+    dim=size(temp);
+    mx=dim(1);my=dim(2);
+
 else
     error('only dcimg and h5 accepted here')
 end

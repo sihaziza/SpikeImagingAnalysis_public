@@ -1,6 +1,14 @@
 function [frequency,pow,options]=plotPSD(data,varargin)
 
 % EXAMPLE: [~,options]=plotPSD(data,'FrameRate',200,'FreqBand',[0.1 100])
+% 'VerboseMessage'  =true;
+% 'VerboseFigure'   =true;
+% 'Savefig'         =false;
+% 'FrameRate'       =1000;
+% 'FreqBand'        =[0.1 min(options.FrameRate/2,30)];
+% 'Window'          =5;
+% 'figureHandle'    =[];
+% 'scaleAxis'       ='linear';
 
 % DEFAULT Options
 options.VerboseMessage=true;
@@ -11,6 +19,8 @@ options.FreqBand=[0.1 min(options.FrameRate/2,30)];
 options.Window=5;
 options.figureHandle=[];
 options.scaleAxis='linear';
+options.plotAverage=false;
+
 
 % USER-DEFINED INPUT OPTIONS
 if nargin>1
@@ -20,11 +30,14 @@ end
 Fs=round(options.FrameRate);
 win=options.Window*Fs;
 ovl=round(0.9*win);
-nfft=100*Fs;
+nfft=10*Fs;
 
-[xg,frequency] =pwelch(data-median(data),win,ovl,nfft,Fs,'onesided');
+[xg,frequency] =pwelch(data-mean(data),win,ovl,nfft,Fs,'onesided');
 pow=10*log10(xg);
 
+if options.plotAverage
+    pow=mean(pow,2);
+end
 % k=find(frequency>=band(2),1,'first');
 % pow=pow-min(pow(1:k,:),[],1); % to norm all to same noise floor
 

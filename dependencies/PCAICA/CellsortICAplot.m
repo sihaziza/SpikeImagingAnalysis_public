@@ -27,14 +27,15 @@ function CellsortICAplot(mode, ica_filters, ica_sig, f0, tlims, dt, ratebin, plo
 % Email: eran@post.harvard.edu, mschnitz@stanford.edu
 %
 
-colord=[         0         0    1.0000
-    0    0.4000         0
-    1.0000         0         0
+colord=[        0.4         0.6   0.8
+    0.6    0.6        0.15
+    0.8         0.1         0.1
     0    0.7500    0.7500
     0.7500         0    0.7500
-    0.8, 0.5, 0
-    0         0    0.5
-    0         0.85      0];
+    0.2         0.75      0.2
+    0.8  0.5  0
+    0         0.8    0.5
+    0.3         0.8      0.1];
 
 % Check input arguments
 nIC = size(ica_sig,1);
@@ -283,13 +284,14 @@ switch mode
             
             % Write the number at the cell center
             [ypeak, xpeak] = find(ica_filtersuse == max(max(ica_filtersuse)),1);
-            text(xpeak,ypeak,num2str(j), 'horizontalalignment','c','verticalalignment','m','color','k')
+            text(xpeak,ypeak,num2str(j),...
+                'Color',colord(mod(j-1,size(colord,1))+1,:),'FontSize',14,'horizontalalignment','c','verticalalignment','m')
         end
         hold off
         caxis(cax)
         formataxes
         axis image tight off
-        title('Avg of movie, with contours of ICs')
+%         title('Avg of movie, with contours of ICs')
         
         ax = subplot(4,1,[2 4]);
         if plottype<=2
@@ -350,15 +352,15 @@ switch mode
         set(gcf,'Color','w','PaperPositionMode','auto')
         set(gca,'yticklabel',num2str(fliplr([1:length(ICuse)])'))
         
-        axes('Position',get(ax,'Position'),'XAxisLocation','top','Color','none')
-        xt = get(ax,'XTick');
+%         axes('Position',get(ax,'Position'),'XAxisLocation','top','Color','none')
+%         xt = get(ax,'XTick');
         xlim(tlims)
-        formataxes
-        set(gca,'YTick',[], ...
-            'XTick',xt,'XTickLabel',num2str(xt'/dt, '%15.0f'))
-        xlabel('Frame number')
-        axes(ax)
-        box on
+%         formataxes
+%         set(gca,'YTick',[], ...
+%             'XTick',xt,'XTickLabel',num2str(xt'/dt, '%15.0f'))
+%         xlabel('Frame number')
+%         axes(ax)
+        box off
    
         disp('CellSortICAplot is done')
 end

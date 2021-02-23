@@ -98,7 +98,7 @@ end
 if isempty(dir(outputdir))
     mkdir(pwd, '/cellsort_preprocessed_data/')
 end
-if outputdir(end)~='/';
+if outputdir(end)~='/'
     outputdir = [outputdir, '/'];
 end
 
@@ -107,31 +107,42 @@ if isempty(badframes)
 else
     fnmat = [outputdir, fname, '_',num2str(flims(1)),',',num2str(flims(2)),'_selframes_', date,'.mat'];
 end
+
+% SH-20210216: add another file check if data already processed
+outputFile= dir([outputdir, strcat(fname,'*')]);
+
 if ~isempty(dir(fnmat))
     fprintf('CELLSORT: Movie %s already processed;',fn)
     forceload = input(' Re-load data? [0-no/1-yes] ');
     if isempty(forceload) || forceload==0
-        load(fnmat);
-        %                 h5read(
+        load(fnmat)
         return
     end
+elseif ~isempty(outputFile) % SH-20210216: add another file check if data already processed
+     fprintf('CELLSORT: Movie %s already processed. \n',outputFile.name)
+     fprintf('Re-loading existing data - delete file is you want to reprocess it. \n')
+        fntemp=fullfile(outputFile.folder,outputFile.name);
+        load(fntemp)
+        return
 end
 
 npix = pixw*pixh;
 fprintf('   %d pixels x %d time frames;', npix, nt)
 
 % Create covariance matrix
+tic; 
 if nt < npix
     fprintf(' using temporal covariance matrix.\n')
     [covmat, mov, movm, movtm] = create_tcov(fn, pixw, pixh, useframes, nt, dsamp);
 else
-    fprintf(' using spatial covariance matrix.\n')
+    tic; fprintf(' using spatial covariance matrix.\n')
     [covmat, mov, movm, movtm] = create_xcov(fn, pixw, pixh, useframes, nt, dsamp);
 end
+toc; disp('covariance done!')
 
 covtrace = trace(covmat) / npix;
 movm = reshape(movm, pixw, pixh);
-
+tic; 
 if nt < npix
     % Perform SVD on temporal covariance
     [mixedsig, CovEvals] = cellsort_svd(covmat, nPCs, nt, npix);
@@ -148,13 +159,15 @@ else
     mixedsig = mixedsig' / npix^2;
 end
 mixedfilters = reshape(mixedfilters, pixw,pixh,nPCs);
+toc; disp('SVD done!')
 
 %------------
 % Save the output data
+tic;
 save(fnmat,'mixedfilters','CovEvals','mixedsig', ...
     'movm','movtm','covtrace')
-fprintf(' CellsortPCA: saving data and exiting; ')
-toc
+toc; fprintf(' CellsortPCA: saving data and exiting; ')
+
 
 end
 

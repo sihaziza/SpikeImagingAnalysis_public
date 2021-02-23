@@ -5,7 +5,7 @@ nTrace=size(spikeRaster,2);
 
 BW=100; %for gamma
 
-rp=figure('defaultaxesfontsize',16,'color','w');
+rp=figure('defaultaxesfontsize',16,'color','w'); % refractory period
 osc=figure('defaultaxesfontsize',16,'color','w');
 for iTrace=1:nTrace    
     for jTrace=1:nTrace
@@ -15,14 +15,15 @@ for iTrace=1:nTrace
         figure(rp)
         subplot(nTrace,nTrace,nTrace*(iTrace-1)+jTrace)
         plot(lags,r,'k','linewidth',1.5)
-        xlim([-25 25])
+        xlim([-50 50])
         ylim([0 0.2])
 
         figure(osc)
         subplot(nTrace,nTrace,nTrace*(iTrace-1)+jTrace)
-        r((length(r)+1)/2)=0;
+%         r((length(r)+1)/2)=0;
         plot(lags,movavg(r,'simple',Fs/BW),'k','linewidth',1.5)
-        xlim([-250 250])
+%         plot(lags,r,'k','linewidth',1.5)
+        xlim([-500 500])
         ylim([0 0.1])
     end
 end

@@ -97,6 +97,8 @@ end
 % Perform ICA
 [ica_A, numiter] = fpica_standardica(sig_use, nIC, ica_A_guess, termtol, maxrounds);
 
+% try to implement fastICA from package to see whether it is faster... SH_20210108
+
 % Sort ICs according to skewness of the temporal component
 ica_W = ica_A';
 
@@ -105,7 +107,7 @@ ica_filters = reshape((mixedfilters*diag(CovEvals.^(-1/2))*ica_A)', nIC, nx);  %
 ica_filters = ica_filters / npix^2;
 
 icskew = skewness(ica_sig');
-[icskew, ICord] = sort(icskew, 'ascend');
+[icskew, ICord] = sort(icskew, 'descend');
 ica_A = ica_A(:,ICord);
 ica_sig = ica_sig(ICord,:);
 ica_filters = ica_filters(ICord,:);
