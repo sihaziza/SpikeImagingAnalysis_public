@@ -8,7 +8,7 @@ nTrace=size(spikes,2);
 Time=0:1/Fs:(size(spikes,1)-1)/Fs;
 
 spikeRaster=cell(nTrace);
-negDFF=true;
+negDFF=false;
 if negDFF
     spikes=-spikes;
 end

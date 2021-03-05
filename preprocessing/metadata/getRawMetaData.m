@@ -2,7 +2,7 @@ function [metadata]=getRawMetadata(allPaths,varargin)
 % [metadata]=getMetaData(folderpath)
 % [metadata]=getMetaData(folderpath,'parameter',value,...)
 %
-% Created by Simon Haziza & Radek Chrapkiewicz, Stanford University, 2019
+% Created by Simon Haziza, Stanford University, 2019
 % To Do > save the file name as well. Usefull for downstream analysis
 
 %% SET ALL OPTIONS
@@ -200,11 +200,12 @@ metadata.croppingMethod=[]; % manual and auto available
 metadata.h5cropIndex=[];% if to load specific section of h5 file
 metadata.ROI=[]; % [xmin ymin width height] Matlab convention (dcimg XY inverted) - can be used directly with imcrop
 metadata.findBestFilter=false;
-metadata.vectorBandPassFilter=[2 20];% default if previous false - for reg & moco
+metadata.vectorBandPassFilter=[1 20];% default if previous false - for reg & moco
 
 % TTL for behavior sync
 metadata.loadTTL=false;
 metadata.TTL=[];
+metadata.Locomotion=[];
 
 % Memory Settings
 metadata.memoryAvailable=[];

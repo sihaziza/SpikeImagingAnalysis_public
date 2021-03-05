@@ -36,13 +36,13 @@ switch options.umxMethod
     case 'pca'
         
         for iTrunc=1:Q-1
-%             [coeff,~,~,~,~,~] = pca([sigPrep(iTrunc,:)'; refPrep(iTrunc,:)']);
-%             alpha(iTrunc)=coeff(1);
-%             
+            %             [coeff,~,~,~,~,~] = pca([sigPrep(iTrunc,:)'; refPrep(iTrunc,:)']);
+            %             alpha(iTrunc)=coeff(1);
+            %
             A=[sigPrep(iTrunc,:); refPrep(iTrunc,:)];
-[U,~,~] = svd(A,'econ');
-U=U./diag(U);
-         alpha(iTrunc)=abs(1/U(1,2));
+            [U,~,~] = svd(A,'econ');
+            U=U./diag(U);
+            alpha(iTrunc)=abs(1/U(1,2));
         end
         alpha=alpha.*ones(size(sigPrep));
         
@@ -52,13 +52,13 @@ U=U./diag(U);
         tempSig=signal((Q-1)*NEW_WINDOW*Fs+1:end);
         tempRef=reference((Q-1)*NEW_WINDOW*Fs+1:end);
         
-%         [coeff,~,~,~,~,~] = pca([tempSig'; tempRef']);
-%         alpha=[alpha coeff(1).*ones(size(tempSig))];
-                    A=[tempSig; tempRef];
-[U,~,~] = svd(A,'econ');
-U=U./diag(U);
-                 alpha=[alpha abs(1/U(1,2)).*ones(size(tempSig))];
-
+        %         [coeff,~,~,~,~,~] = pca([tempSig'; tempRef']);
+        %         alpha=[alpha coeff(1).*ones(size(tempSig))];
+        A=[tempSig; tempRef];
+        [U,~,~] = svd(A,'econ');
+        U=U./diag(U);
+        alpha=[alpha abs(1/U(1,2)).*ones(size(tempSig))];
+        
         % Highest variance PC1 is hemodynamic aka reference. Source is the first
         % input. The signal can be reconstructed using the first element of the
         % diagonal/anti-diagonal ratio.
@@ -125,13 +125,13 @@ U=U./diag(U);
         alphaLIN=alpha;
         
     case 'ica'
-%         [icasig, ~, W] = fastica(A,'approach','symm','g','tanh','epsilon',1e-6,'stabilization','on','displayMode','on','verbose','off');
-% W(1,:)=W(1,:)./W(1,1);
-% W(2,:)=W(2,:)./W(2,2);
-% W
-% 
-% % rank ICA output based on heartbeat power ? or skewness of A?
-
+        %         [icasig, ~, W] = fastica(A,'approach','symm','g','tanh','epsilon',1e-6,'stabilization','on','displayMode','on','verbose','off');
+        % W(1,:)=W(1,:)./W(1,1);
+        % W(2,:)=W(2,:)./W(2,2);
+        % W
+        %
+        % % rank ICA output based on heartbeat power ? or skewness of A?
+        
 end
 
 %%
@@ -176,10 +176,10 @@ end
 %         end
 %     end
 % end
-% 
+%
 % a=mean(alpha,2);
 % a=smoothdata(a,'sgolay',round(length(signal)/2^(scale-1),0));
-% 
+%
 % UMX=zscore(signal-a.*reference);
 
 % disp('Done unmixing piece-wise')

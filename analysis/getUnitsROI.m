@@ -1,8 +1,7 @@
-function [units, trace]=getUnitsROI(h5Path,Fs)
+function [units, trace,boundbox]=getUnitsROI(h5Path,Fs)
 % to extract time traces based on ROI without loading the full movie
-
+% [units, trace]=getUnitsROI(h5Path,Fs)
 % Step1: load 1st second and generate the average frame to crop from
-
 % Step2: get the average pixel trace from the h5 file
 % drawcircle
 % imcrop

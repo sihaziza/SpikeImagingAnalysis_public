@@ -48,7 +48,7 @@ for iMouse=1:length(mouse)
     'softwareBinning',1,...
     'findBestFilter',false,...
     'croppingMethod','manual',... 
-    'loadTTL',false);%     
+    'loadTTL',true);%     
             end
         end
     end
@@ -83,26 +83,26 @@ metaPath=fullfile(metaPathMain,date,folderName{iFolder});
 temp=load(fullfile(metaPath,'metadata.mat'));
 metadata=temp.metadata; clear temp;
 
-% loading(metadata.allPaths);
+loading(metadata.allPaths);
 
-% % % GENERATE THE BANDPASS MOVIE FOR MOTION CORRECTION
-% % Find the best filter frequency bands - [2 20] is good
-% % [bpFilter]=findBestFilterParameters(allPaths.h5PathG);
+% GENERATE THE BANDPASS MOVIE FOR MOTION CORRECTION
+% Find the best filter frequency bands - [2 20] is good
+% [bpFilter]=findBestFilterParameters(allPaths.h5PathG);
 % metadata.vectorBandPassFilter=[1 30];
-% bandPassMovieChunk(metadata.allPaths.h5PathG,metadata.vectorBandPassFilter);
-% bandPassMovieChunk(metadata.allPaths.h5PathR,metadata.vectorBandPassFilter);
-% 
-% % % CORRECT THE MOVIE FROM MOTION ARTEFACTS
-% pathG=strrep(metadata.allPaths.h5PathG,'.h5', '_bp.h5');
-% pathR=strrep(metadata.allPaths.h5PathR,'.h5', '_bp.h5');
-% try
-% motionCorr1Movie(pathG,'nonRigid', false);
-% catch
-% end
-% try
-% motionCorr1Movie(pathR,'nonRigid', false);
-% catch
-% end
+bandPassMovieChunk(metadata.allPaths.h5PathG,metadata.vectorBandPassFilter);
+bandPassMovieChunk(metadata.allPaths.h5PathR,metadata.vectorBandPassFilter);
+
+% CORRECT THE MOVIE FROM MOTION ARTEFACTS
+pathG=strrep(metadata.allPaths.h5PathG,'.h5', '_bp.h5');
+pathR=strrep(metadata.allPaths.h5PathR,'.h5', '_bp.h5');
+try
+motionCorr1Movie(pathG,'nonRigid', false);
+catch
+end
+try
+motionCorr1Movie(pathR,'nonRigid', false);
+catch
+end
 
 % % CORRECT for photobleaching
 % pathG=strrep(metadata.allPaths.h5PathG, '.h5','_moco2.h5');
@@ -117,17 +117,17 @@ metadata=temp.metadata; clear temp;
 % end
 
 % DENOISING the Movie
-% try
-% pathG=strrep(metadata.allPaths.h5PathG,'.h5', '_moco2_dtr2.h5');
-% denoising1Movie(pathG,'windowSize',metadata.fps);
-% catch
-% end
-% 
-% try
-% pathR=strrep(metadata.allPaths.h5PathR,'.h5', '_moco2_dtr2.h5');
-% denoising1Movie(pathR,'windowSize',metadata.fps);
-% catch
-% end
+try
+pathG=strrep(metadata.allPaths.h5PathG,'.h5', '_moco.h5');
+denoising1Movie(pathG,'windowSize',2*metadata.fps);
+catch
+end
+
+try
+pathR=strrep(metadata.allPaths.h5PathR,'.h5', '_moco.h5');
+denoising1Movie(pathR,'windowSize',2*metadata.fps);
+catch
+end
 
 % % DENOISING the Movie
 % pathG=strrep(metadata.allPaths.h5PathG,'.h5', '_dtr.h5');

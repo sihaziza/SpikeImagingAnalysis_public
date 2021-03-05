@@ -1,6 +1,6 @@
 function [frequency,pow,options]=plotPSD(data,varargin)
 
-% EXAMPLE: [~,options]=plotPSD(data,'FrameRate',200,'FreqBand',[0.1 100])
+% EXAMPLE: [frequency,pow,options]=plotPSD(data,'FrameRate',200,'FreqBand',[0.1 100])
 % 'VerboseMessage'  =true;
 % 'VerboseFigure'   =true;
 % 'Savefig'         =false;
@@ -32,7 +32,7 @@ win=options.Window*Fs;
 ovl=round(0.9*win);
 nfft=10*Fs;
 
-[xg,frequency] =pwelch(data-mean(data),win,ovl,nfft,Fs,'onesided');
+[xg,frequency] =pwelch(data-median(data),win,ovl,nfft,Fs,'onesided');
 pow=10*log10(xg);
 
 if options.plotAverage
