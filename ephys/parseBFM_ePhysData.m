@@ -1,11 +1,17 @@
 
 
 ePhysPath='F:\GEVI_Spike\ePhys\Spontaneous\m915\20210221';
-oPhysPath='F:\GEVI_Spike\Preprocessed\Spontaneous\m915\20210221\meas00';
+oPhysPath='F:\GEVI_Spike\Preprocessed\Spontaneous\m915\20210221';
 
+iMeas=1;
+folder=strcat('meas0',num2str(iMeas-1));
+filePath=fullfile(oPhysPath,folder,'metadata.mat');
 % Load Behavior data
-if isfile(fullfile(oPhysPath,'metadata.mat'))
-    load(fullfile(oPhysPath,'metadata.mat'));
+if isfile(filePath)
+    load(filePath);
+    oPhys.data=metadata.Locomotion;
+    oPhys.ttl=metadata.TTL;
+    oPhys.fps=metadata.fps;
 else
     warning('No behavioral data - is it normal?')
 end
@@ -14,92 +20,69 @@ end
 ePhysPath=dir(fullfile(ePhysPath,'*.rhd'));
 fprintf('%2.0f intan files detected \n',length(ePhysPath));
 disp('Recursive readout of INTAN data')
-ePhys=[];dioE=[];
-for iFile=1:length(ePhysPath)
-    read_Intan_RHD2000_file(fullfile(ePhysPath(iFile).folder,ePhysPath(iFile).name))
-    ePhys=[ePhys amplifier_data];
-    dioE=[dioE board_dig_in_data];
-end
-amplifier_data=ePhys;
-board_dig_in_data=dioE;
-t_amplifier=linspace(0,(length(amplifier_data)-1)/fpsE,length(amplifier_data));
+
+iFile=1;
+read_Intan_RHD2000_file(fullfile(ePhysPath(iFile).folder,ePhysPath(iFile).name))
+ePhys.data=amplifier_data';
+ePhys.ttl=board_dig_in_data';
+ePhys.fps=frequency_parameters.board_adc_sample_rate;
+
+%% 
+
+
+[ePhys_cal,oPhys_cal]=alignRecording(ePhys,oPhys);
 
 %%
-% Find first-last behaviorTTL on ePhys and oPhys DIO data
-fpsO=metadata.fps;
-fpsE=frequency_parameters.board_adc_sample_rate;
-
-ttlO=metadata.TTL;
-ttlE=dioE;
-
 timeE=getTime(ttlE,fpsE);
 timeO=getTime(ttlO,fpsO);
 
-plot(timeE, ttlE, timeO,ttlO)
+plot(timeE, [ttlE 10*movmean(ttlE,30*fpsE)], timeO,ttlO - linspace(0,11,6))
 
-%%
-INTANdio=downsample(board_dig_in_data',fpsE/fpsO);
-INTANePhys=downsample(amplifier_data',fpsE/fpsO);
-t_amplifier=downsample(t_amplifier',fpsE/fpsO);
+[~,locs] =findpeaks(movmean(ttlE,30*fpsE),'MinPeakDistance',30*fpsE);
+delta=diff(locs)./2;
+delta=[0 delta' length(ttlE)-locs(end)];
 
-
-
-figure()
-title('Raw data in their own time frame')
-plot(TimeStamps,ttlO)
-hold on
-plot(t_amplifier,ttlE-1)
-hold off
-
-%% 
-t=getTime(dioE,fpsE);
-plot(t,[ePhys' dioE'])
-
-plotPSD(ePhys','FreqBand',[-1 2.5],'FrameRate',fpsE,'Window',2,'scaleAxis','log');
-%% Other method to be more conservative and don't throw away too many data
-
-[r,lags]=xcorr(ttlO,ttlE);
-[~,idShift]=max(r);
-shift=lags(idShift)+1;
-
-if shift>0
-    disp('ePhys is in advance')
-    idO_first=shift;
-    idE_first=1;
-    
-    deltaO=length(ttlO)-shift;
-    deltaE=length(ttlE);
-    delta=min(deltaO,deltaE);
-    
-else
-    disp('TEMPO is in advance')
-    shift=-shift;
-
-    idO_first=1;
-    idE_first=shift;
-    
-    deltaO=length(ttlO);
-    deltaE=length(ttlE)-shift;
-    delta=min(deltaO,deltaE);
+for iLocs=1:length(locs)
+    meas(iLocs).ttlE= ttlE(round(locs(iLocs)-delta(iLocs)):round(locs(iLocs)+delta(iLocs+1)));
 end
 
-figure()
-lnWidth=1.5;
-subplot(211)
-plot(TimeStamps,ttlO,'linewidth',lnWidth)
-hold on
-plot(t_amplifier,ttlE-1,'linewidth',lnWidth)
-hold off
-title('Raw data in their own time frame')
-
-time=linspace(0,delta/fpsO,delta);
-subplot(212)
-plot(time,ttlO(idO_first:idO_first+delta-1),'linewidth',lnWidth)
-hold on
-plot(time,ttlE(idE_first:idE_first+delta-1)-1,'linewidth',lnWidth)
-hold off
-xlabel('Time (s)')
-title('Multimodal re-alignment')
+for iMeas=1:6
+    ttlE_temp=meas(iMeas).ttlE;
+    ttlO_temp=ttlO(:,iMeas);
+    
+    x=getTime(ttlO_temp,fpsO);
+    v=ttlO_temp;
+    xq=linspace(0,x(end),x(end)*fpsE);
+    vq = interp1(x,v,xq,'nearest')';
+    plot(xq, vq,ttlE_temp)
+    
+    % Find the delay between the last ttl and the end of the recording
+    [offsetO,~]=find(diff(ttlO_temp)==1,1,'last');
+    dT=(length(ttlO_temp)-offsetO+1)/fpsO;
+    
+    % detect the equivalent end on the ePhys data
+    [offsetE,~]=find(diff(ttlE_temp)==1,1,'last');
+%     truncE=ttlE_temp(
+    timeE=getTime(ttlE_temp,fpsE);
+    timeO=getTime(ttlO_temp,fpsO);
+    
+    [onsetO,~]=find(diff(ttlO_temp)==1,1,'first');
+    [offsetO,~]=find(diff(ttlO_temp)==-1,1,'last');
+    timeO([onsetO offsetO end])
+    
+    [onsetE,~]=find(diff(ttlE_temp)==1,1,'first');
+    [offsetE,~]=find(diff(ttlE_temp)==-1,1,'last');
+    timeE([onsetE offsetE end])
+    
+    plot(timeE, ttlE_temp, timeO,ttlO_temp)
+    [allEventsO,~]=find(diff(ttlO_temp)==1);
+    [allEventsE,~]=find(diff(ttlE_temp)==1);
+    
+    if numel(allEventsO)~=numel(allEventsE)
+        warning('n')
+    end
+end
+%%
 
 % Check for incorrect parsing of data
 clear ePhys oPhys dio metadata

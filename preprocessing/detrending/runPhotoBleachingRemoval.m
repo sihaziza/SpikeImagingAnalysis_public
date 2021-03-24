@@ -29,7 +29,16 @@ end
 
 %% CORE FUNCTION
 d=size(data);
+
+% check if vector, matrix or tensor
+if numel(d)>2
 temp=reshape(data,d(1)*d(2),d(3));
+elseif d(1)>d(2) % need row vector
+    temp=data';
+else
+    temp=data;
+end
+
 Fs=options.samplingRate;
 lowF=options.lpCutOff;
 
@@ -56,6 +65,11 @@ switch options.methods
         toc;
 end
 
+if  numel(d)>2
 data_dtr=reshape(tempCorr,d(1),d(2),d(3));
+else
+data_dtr=tempCorr;
+end
+
 data_dtr=single(data_dtr);
 end

@@ -6,58 +6,62 @@ function [output]=pieceWiseUnmixing(signal, reference, Fs, varargin)
 % Output strucutre:
 %   output.residual
 %   output.coefficient
+% Variable Input Arguments:
+%     options.umxMethod='pca'; %rlr,linear,ica
+%     options.method='sliding';   % 'sliding' or 'pyramid'
+%     options.window=0.5;           % 1 second
+%     options.overlap=0.5;        % 50%
 
-options.umxMethod='pca';
+options.umxMethod='pca'; %rlr,linear,ica
 options.method='sliding';   % 'sliding' or 'pyramid'
-options.window=0.5;           % 1 second
+options.window=[];           % 1 second
 options.overlap=0.5;        % 50%
-
+options.verbose=1;
 %% GET OPTIONS
 
 options=getOptions(options,varargin);
 
+%% CHECK INPUT
+
+d=size(signal);
+if d(1)<d(2) % only work with column vectors - time in rows
+    signal=signal';
+    reference=reference';
+end
+    
 %% CORE
-
 n=length(signal);
-[NEW_WINDOW]=getBestWindow(n, options.window, Fs);
 
-[Q,~] = getQuoRem(n,NEW_WINDOW*Fs);
+if isempty(options.window)
+    options.window=n;
+    vectT=[0 n];
+else
+vectT=findBestPartition(n,options.window*Fs);
+vectT(1)=0; % for the subsequent loop
+end
 
-truncSig=signal(1:(Q-1)*NEW_WINDOW*Fs);
-sigPrep=reshape(truncSig,Q-1,NEW_WINDOW*Fs);% treat the last section separatly
 
-truncRef=reference(1:(Q-1)*NEW_WINDOW*Fs);
-refPrep=reshape(truncRef,Q-1,NEW_WINDOW*Fs);% treat the last section separatly
+signal_temp=sh_bpFilter(signal,[5 30],Fs)+1;
+reference_temp=sh_bpFilter(reference,[5 30],Fs)+1;
+
+% signal_temp=signal;
+% reference_temp=reference;
 
 %%
-alpha=zeros(Q-1,1);
+
+alpha=zeros(d);
 
 switch options.umxMethod
     case 'pca'
         
-        for iTrunc=1:Q-1
-            %             [coeff,~,~,~,~,~] = pca([sigPrep(iTrunc,:)'; refPrep(iTrunc,:)']);
-            %             alpha(iTrunc)=coeff(1);
-            %
-            A=[sigPrep(iTrunc,:); refPrep(iTrunc,:)];
+        for i=1:length(vectT)-1
+            %             A=[sigPrep(iTrunc,:); refPrep(iTrunc,:)];
+            A=[reference(vectT(i)+1:vectT(i+1),1)';signal(vectT(i)+1:vectT(i+1),1)'];
             [U,~,~] = svd(A,'econ');
             U=U./diag(U);
-            alpha(iTrunc)=abs(1/U(1,2));
+            %             alpha(iTrunc)=abs(1/U(1,2));
+            alpha(vectT(i)+1:vectT(i+1),1)=abs(1/U(1,2));
         end
-        alpha=alpha.*ones(size(sigPrep));
-        
-        alpha=reshape(alpha',[1, prod(size(alpha),'all')]);
-        
-        % Deal with the last trunc
-        tempSig=signal((Q-1)*NEW_WINDOW*Fs+1:end);
-        tempRef=reference((Q-1)*NEW_WINDOW*Fs+1:end);
-        
-        %         [coeff,~,~,~,~,~] = pca([tempSig'; tempRef']);
-        %         alpha=[alpha coeff(1).*ones(size(tempSig))];
-        A=[tempSig; tempRef];
-        [U,~,~] = svd(A,'econ');
-        U=U./diag(U);
-        alpha=[alpha abs(1/U(1,2)).*ones(size(tempSig))];
         
         % Highest variance PC1 is hemodynamic aka reference. Source is the first
         % input. The signal can be reconstructed using the first element of the
@@ -66,74 +70,83 @@ switch options.umxMethod
         % umxcoeff=temp(1);
         % unmixsource=M(:,1)-umxcoeff.*M(:,2); % compute the residual
         
-        output.residual=signal-alpha.*reference;
-        output.coefficient=alpha;
+        % Smooth the coefficient output
+        alpha=sh_bpFilter(alpha,[inf 0.1],Fs);
         
-        time=getTime(alpha,Fs);
-        plot(time,alpha)
-        alphaPCA=alpha;
+        output.residual=sh_bpFilter(signal-alpha.*reference,[0.1 inf],Fs);
+        output.coefficient=alpha;
+        output.methods='svd';
+        output.window=options.window;
+        
     case 'rlr'
-        
-        for iTrunc=1:Q-1
-            p=robustfit(refPrep(iTrunc,:),sigPrep(iTrunc,:));
-            alpha(iTrunc)=p(2);
+        for j=1:d(2)
+        for i=1:length(vectT)-1
+            p=robustfit(reference_temp(vectT(i)+1:vectT(i+1),1),signal_temp(vectT(i)+1:vectT(i+1),1));
+            alpha(vectT(i)+1:vectT(i+1),1)=p(2);
         end
-        alpha=alpha.*ones(size(sigPrep));
-        
-        alpha=reshape(alpha',[1, prod(size(alpha),'all')]);
-        
-        % Deal with the last trunc
-        tempSig=signal((Q-1)*NEW_WINDOW*Fs+1:end);
-        tempRef=reference((Q-1)*NEW_WINDOW*Fs+1:end);
-        
-        % RLR
-        p=robustfit(tempRef,tempSig);
-        alpha=[alpha p(2).*ones(size(tempSig))];
-        
+        end
+     % Smooth the coefficient output
+        time=getTime(alpha,Fs)';
+        for j=1:d(2)
+        p=robustfit(time,alpha(:,j));
+%         alpha(:,j)=p(2)*time+p(1)
+            alpha=p(1);
+        end
         output.residual=signal-alpha.*reference;
         output.coefficient=alpha;
-        
-        time=getTime(alpha,Fs);
-        plot(time,alpha)
-        alphaRLR=alpha;
-        
+        output.methods='rlr';
+        output.window=options.window;
         
     case 'linear'
         
-        for iTrunc=1:Q-1
-            p=polyfit(refPrep(iTrunc,:),sigPrep(iTrunc,:),1);
-            alpha(iTrunc)=p(1);
+        for j=1:d(2)
+        for  i=1:length(vectT)-1
+            p=polyfit(reference_temp(vectT(i)+1:vectT(i+1),1),signal_temp(vectT(i)+1:vectT(i+1),1),1);
+            alpha(vectT(i)+1:vectT(i+1),j)=p(1);
         end
-        
-        alpha=alpha.*ones(size(sigPrep));
-        
-        alpha=reshape(alpha',[1, prod(size(alpha),'all')]);
-        
-        % Deal with the last trunc
-        tempSig=signal((Q-1)*NEW_WINDOW*Fs+1:end);
-        tempRef=reference((Q-1)*NEW_WINDOW*Fs+1:end);
-        
-        p=polyfit(tempRef,tempSig,1);
-        
-        alpha=[alpha p(1).*ones(size(tempSig))];
-        
+        end
+        % Smooth the coefficient output
+        time=getTime(alpha,Fs)';
+        for j=1:d(2)
+        p=robustfit(time,alpha(:,j));
+%         alpha(:,j)=p(2)*time+p(1)
+            alpha=p(1);
+        end
         output.residual=signal-alpha.*reference;
         output.coefficient=alpha;
-        
-        time=getTime(alpha,Fs);
-        plot(time,alpha)
-        alphaLIN=alpha;
+        output.methods='linear';
+        output.window=options.window;
         
     case 'ica'
-        %         [icasig, ~, W] = fastica(A,'approach','symm','g','tanh','epsilon',1e-6,'stabilization','on','displayMode','on','verbose','off');
-        % W(1,:)=W(1,:)./W(1,1);
-        % W(2,:)=W(2,:)./W(2,2);
-        % W
-        %
-        % % rank ICA output based on heartbeat power ? or skewness of A?
+        
+        
+%         for  i=1:length(vectT)-1
+%             A=[reference(vectT(i)+1:vectT(i+1),1)';signal(vectT(i)+1:vectT(i+1),1)'];           
+%             [~, ~, W] = fastica(A,'approach','symm','g','tanh','epsilon',1e-8,'stabilization','on','displayMode','on','verbose','off');
+%             W(1,:)=W(1,:)./W(1,1);
+%             W(2,:)=W(2,:)./W(2,2);
+%             W
+%             p=polyfit(reference_temp(vectT(i)+1:vectT(i+1),1),signal_temp(vectT(i)+1:vectT(i+1),1),1);
+%             alpha(vectT(i)+1:vectT(i+1),1)=p(1);
+%         end
+        
+        % Smooth the coefficient output
+        %         alpha=sh_bpFilter(alpha,[inf 0.1],Fs);
+        time=getTime(alpha,Fs)';
+        p=robustfit(time,alpha);
+        alpha=p(2)*time+p(1);
+        %         plot(alpha)
+        %         plot(output.residual)
+        output.residual=sh_bpFilter(signal-alpha.*reference,[0.1 inf],Fs);
+        output.coefficient=alpha;
+        output.methods='linear';
+        output.window=options.window;
+        % rank ICA output based on heartbeat power ? or skewness of A?
         
 end
 
+% time=getTime(alpha,Fs);
+% plot(time,alpha)
 %%
 %
 % % don't normalize... keep the real values

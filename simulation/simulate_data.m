@@ -92,8 +92,10 @@ while true
     end
     %         T = conv(spikes,temp_kernel);
     %         T = T(1:t);
-    [ spikeMat] = poissonSpikeGen ( event_rate , t/1000,refractory_period);
-    T=conv(spikeMat,temp_kernel,'same');
+%     [ spikeMat] = poissonSpikeGen ( event_rate , t/1000,refractory_period);
+%     T=conv(spikeMat,temp_kernel,'same');
+
+    [T]=simulateInvivoImagingSpikeTrain(event_rate, t,1000, refractory_period);
     
     if strcmpi(polarity,'dual')
         if (rand<0.5)

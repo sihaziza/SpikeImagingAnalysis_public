@@ -55,8 +55,9 @@ if options.VerboseFigure
             trace=pow;%-movmin(pow,20*Nfft/Fs);
             plot(frequency,trace,'linewidth',1.5)
             xlim(options.FreqBand)
-            ylabel('Power Spectrum Density')
+            title('Power Spectrum Density')
             xlabel('Frequency (Hz)')
+            ylabel('Power dB')
 %             title('pWelch-estimated Power Spectral Density')
         case 'log'
             % band=[0 2];

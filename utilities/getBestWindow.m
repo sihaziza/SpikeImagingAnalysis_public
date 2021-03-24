@@ -16,6 +16,7 @@ end
 
 NEW_WINDOW=floor(NEW_WINDOW*SAMPLING_RATE)/SAMPLING_RATE;
 
-fprintf('estimated best time window is %2.3f \n',NEW_WINDOW);
+% fprintf('estimated best time window is %2.3f \n',NEW_WINDOW);
 
 end
+

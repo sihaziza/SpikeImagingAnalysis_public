@@ -27,8 +27,8 @@ thres=options.threshold; % percent cutoff from background baseline
 if isempty(options.boundbox)
     xs=sum(image,1);
     ys=sum(image,2);
-    xs=normalize(xs,'range',[0 1]);
-    ys=normalize(ys,'range',[0 1]);
+    xs=rescale(xs,0,1);
+    ys=rescale(ys,0,1);
     
     x_i=find(xs>thres,1,'first');
     x_f=find(xs>thres,1,'last');

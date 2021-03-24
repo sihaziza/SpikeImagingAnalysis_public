@@ -15,9 +15,11 @@ function [movie_dtr]=detrending(h5Path,varargin)
 options.spatialChunk=false;
 options.methods='lowpass';
 options.samplingRate=[];
-options.lpCutOff=0.5;
+options.lpCutOff=0.1;
 options.binning=[];
 options.frameRange=[];
+options.saveData=true;
+options.dfof=false; %F/F0 or (F-F0)/F0 
 
 options.verbose=1;
 options.plot=true;
@@ -78,8 +80,6 @@ fs=options.samplingRate;
 lpCutOff=options.lpCutOff;
 % frameRange=options.frameRange;
 
-h5create(options.detrendMoviePath,dataset,dim,'Datatype','single');
-
 if options.spatialChunk % if too many pixels > detrending is pixel-independent
     disps('sorry not ready yet... ask for implementation')
     
@@ -99,10 +99,16 @@ else
     [movie_dtr]=runPhotoBleachingRemoval(M,'samplingRate',fs,'lpCutOff',lpCutOff);
     toc; disps('Data succesfully detrended')
     
+    if options.dfof
+        movie_dtr=movie_dtr-ones(size(movie_dtr));
+    end
+    
+    if options.saveData
     disps('Saving data as h5 file')
+    h5create(options.detrendMoviePath,dataset,size(movie_dtr),'Datatype','single');
     h5write(options.detrendMoviePath, dataset, single(movie_dtr)); toc;
     toc; disps('Data succesfully saved')
-    
+    end
 end
 
 
