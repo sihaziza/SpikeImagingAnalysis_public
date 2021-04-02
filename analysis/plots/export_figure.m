@@ -59,15 +59,15 @@ default_path=fullfile(folder,[filename,'.',options.default_format]);
 
 saveas_local(figure_handle,default_path);
 
-for ii=1:length(options.other_formats)
-    additional_folder=fullfile(folder,options.other_formats{ii});
-    if ~isfolder(additional_folder)
-        mkdir(additional_folder)
-    end
-    extra_path=fullfile(additional_folder,[filename,'.',options.other_formats{ii}]);
-    saveas_local(figure_handle,extra_path);
- 
-end
+% for ii=1:length(options.other_formats)
+%     additional_folder=fullfile(folder,options.other_formats{ii});
+%     if ~isfolder(additional_folder)
+%         mkdir(additional_folder)
+%     end
+%     extra_path=fullfile(additional_folder,[filename,'.',options.other_formats{ii}]);
+%     saveas_local(figure_handle,extra_path);
+%  
+% end
 
 figure_handle.Position=previous_position;
 

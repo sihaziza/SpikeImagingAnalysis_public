@@ -1,14 +1,14 @@
 function [frequency,pow,options]=plotPSD(data,varargin)
 
-% EXAMPLE: [~,options]=plotPSD(data,'FrameRate',200,'FreqBand',[0.1 100])
-% 'VerboseMessage'  =true;
-% 'VerboseFigure'   =true;
-% 'Savefig'         =false;
-% 'FrameRate'       =1000;
-% 'FreqBand'        =[0.1 min(options.FrameRate/2,30)];
-% 'Window'          =5;
-% 'figureHandle'    =[];
-% 'scaleAxis'       ='linear';
+% EXAMPLE: [frequency,pow,options]=plotPSD(data,'FrameRate',200,'FreqBand',[0.1 100])
+% 'VerboseMessage'  ,true;
+% 'VerboseFigure'   ,true;
+% 'Savefig'         ,false;
+% 'FrameRate'       ,1000;
+% 'FreqBand'        ,[0.1 min(options.FrameRate/2,30)];
+% 'Window'          ,5;
+% 'figureHandle'    ,[];
+% 'scaleAxis'       ,'linear';
 
 % DEFAULT Options
 options.VerboseMessage=true;
@@ -32,7 +32,7 @@ win=options.Window*Fs;
 ovl=round(0.9*win);
 nfft=10*Fs;
 
-[xg,frequency] =pwelch(data-mean(data),win,ovl,nfft,Fs,'onesided');
+[xg,frequency] =pwelch(data-median(data),win,ovl,nfft,Fs,'onesided');
 pow=10*log10(xg);
 
 if options.plotAverage
@@ -55,8 +55,9 @@ if options.VerboseFigure
             trace=pow;%-movmin(pow,20*Nfft/Fs);
             plot(frequency,trace,'linewidth',1.5)
             xlim(options.FreqBand)
-            ylabel('Power Spectrum Density')
+            title('Power Spectrum Density')
             xlabel('Frequency (Hz)')
+            ylabel('Power dB')
 %             title('pWelch-estimated Power Spectral Density')
         case 'log'
             % band=[0 2];

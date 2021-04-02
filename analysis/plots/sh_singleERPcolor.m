@@ -27,7 +27,7 @@ c=colorbar('Location','southoutside');
 colormap(jet)
 xlabel('Time (s)')
 xlim(epoch)
-c.Label.String = '\DeltaF/s (%)';
+c.Label.String = 'SD norm.';
 hold on
 plot([0 0],[0 n],'--k','LineWidth',1)
 hold off

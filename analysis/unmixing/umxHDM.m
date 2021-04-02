@@ -77,7 +77,7 @@ Fh=Fhemo.Location;
 options.FreqHB=Fh;
 
 % Run optimization
-Valpha=(0:0.01:1.5)';
+Valpha=(0:0.01:2)';
 x=source*ones(size(Valpha))';
 y=reference*Valpha';
 E=bandpower(x-y,Fs,[Fh-2 Fh+2]);

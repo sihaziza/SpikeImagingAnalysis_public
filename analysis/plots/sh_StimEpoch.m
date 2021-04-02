@@ -16,8 +16,18 @@ Uses sh_zscore function
 
 %}
 
-function [array,StimBand]=sh_StimEpoch(Data,TTL,marging,Fs)
+function [array,StimBand]=getStimEpoch(Data,TTL,Fs,varargin)
 
+
+%% DEFAULT OPTIONS
+options.baselinePrePost=1; % 1sec baseline
+options.getShuffle=false;
+
+%% UPDATE OPTIONS
+if nargin>=2
+    options=getOptions(options,varargin);
+end
+%%
 % assume constant stimulation length
 [on,~]=find(diff(TTL) == 1, 1,'first');
 [off,~]=find(diff(TTL) == -1, 1,'first');
@@ -29,7 +39,11 @@ StimBand=[-marging marging+StimLength];
 nCh=size(Data,2);
 
 % find the 0 before 0-1 transition
-[idx,~]=find(diff(TTL) == 1); 
+[idx,~]=find(diff(TTL) == 1);
+if options.getShuffle
+    temp=1:StimLength*Fs:length(TTL);
+   idx_shuffle = randi(temp,1,numel(idx));
+end
 n=length(idx);
 fprintf('%d Cues detected\n',n)
 

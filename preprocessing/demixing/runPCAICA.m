@@ -55,11 +55,11 @@ end
 %%
 % Step 3a: CellsortICA
 % mu=0.99; 
-nIC=10;
-mu=0.99;
+nIC=length(suggestedPCuse);
+mu=1;
 % for i=1:length(mu)
 [ica_sig, ica_filters] = CellsortICA(mixedsig, mixedfilters,...
-                        CovEvals, PCuse, mu, nIC);
+                        CovEvals, suggestedPCuse, mu, nIC);
 
 % filterT(:,:,i)=ica_sig;        
 % filterS(:,:,:,i)=ica_filters;                    

@@ -73,7 +73,7 @@ end
 Fs=options.FrameRate;
 
 % Find Hemo peak
-[Fhemo,optsHB]=FindHBpeak(reference,'FrameRate',Fs,'VerboseMessage',false,'VerboseFigure',false);
+[Fhemo,optsHB]=FindHBpeak(reference,'FrameRate',Fs,'VerboseMessage',false,'VerboseFigure',true);
 Fh=Fhemo.Location;
 options.FreqHB=Fh;
 
@@ -85,7 +85,7 @@ Mfilt=filtfilt(b,a,M);
 % Run Unmixing
 p=robustfit(Mfilt(:,2),Mfilt(:,1));
 umxcoeff=p(2);
-unmixsource=M(:,1)-p(2).*M(:,2); % compute the residual
+unmixsource=M(:,1)-umxcoeff.*M(:,2); % compute the residual
 [~, MSGID] = lastwarn();
 warning('off', MSGID);
 
@@ -95,24 +95,26 @@ if options.VerboseMessage
     fprintf('Unmixing coefficient is @ %2.3f \n',umxcoeff)
 end
 
+M=zscore([source reference unmixsource]);
+
 if options.VerboseFigure
     h=figure('Name','Output Summary for Robust Linear Regression (RLR) method');
     subplot(221)
-    plot(M(1:100:end,end),M(1:100:end,1),'+k')
+    plot(M(1:10:end,1),M(1:10:end,2),'+k')
     hold on
-    plot(M(1:100:end,end),unmixsource(1:100:end,1),'+r')
+    plot(M(1:10:end,1),M(1:10:end,3),'+r')
     hold off
     title('Correlation plot')
     xlabel('Reference')
     
     subplot(222)
-    plotPSD([reference source unmixsource],'FrameRate',Fs,...
-        'FreqBand',options.HeartbeatRange,'figureHandle',h);
+    plotPSD([source reference unmixsource],'FrameRate',Fs,...
+        'FreqBand',[0.5 50],'figureHandle',h);
     title('pWelch PSD plot')
     
     subplot(212)
     t=linspace(0,(length(source)-1)/Fs,length(source))';
-    plot(t,reference,t,source,t,unmixsource)
+    plot(t,M)
     title('Time Trace for all signals')
     xlim([0 5*1/Fh])
     

@@ -199,7 +199,33 @@ if options.parallel % for parallel computing
     end
     disps('File loaded')
 else
-  disps('did not load without parfor...')  
+   for ii=int32(1:numFrames) % indexing starts from 0 for the mex file!!!
+        % Read each frame into the appropriate frame in memory.
+        [framedata,~]=  dcimgmatlab(ii+startframe-1, filepath);
+        framedata=cast(framedata,dataType); % cast typing to preserve more information upon averaging
+        
+        if options.transpose
+            framedata=framedata';
+        end
+        
+        if options.resize && options.scale_factor~=1
+            framedata=imresize(framedata,options.scale_factor,'box'); % this suprisingly gives speed up !
+        end
+%         imshow(framedata,[])
+        % Done after imresize > ROI detected after resizing
+        if ~isempty(options.cropROI)
+            % detect if red channel > to flip it to be in the same ref as
+            % green channel - SH 20201129
+            if strfind(filepath,'cR.dcimg')>0
+            framedata=fliplr(framedata);
+            end
+            % ORCA and matlab different XY convention
+            framedata = imcrop(framedata, options.cropROI);
+        end
+        
+        movie(:,:,ii)  = framedata; % for chunks loading it has to be frameidx not frame
+    end
+    disps('File loaded')
 end %% end choose if sequential of parallel
 %%%%%%%%%%%%%%%%%%%
 
