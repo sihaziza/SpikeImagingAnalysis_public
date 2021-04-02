@@ -1,14 +1,14 @@
 function [frequency,pow,options]=plotPSD(data,varargin)
 
 % EXAMPLE: [frequency,pow,options]=plotPSD(data,'FrameRate',200,'FreqBand',[0.1 100])
-% 'VerboseMessage'  =true;
-% 'VerboseFigure'   =true;
-% 'Savefig'         =false;
-% 'FrameRate'       =1000;
-% 'FreqBand'        =[0.1 min(options.FrameRate/2,30)];
-% 'Window'          =5;
-% 'figureHandle'    =[];
-% 'scaleAxis'       ='linear';
+% 'VerboseMessage'  ,true;
+% 'VerboseFigure'   ,true;
+% 'Savefig'         ,false;
+% 'FrameRate'       ,1000;
+% 'FreqBand'        ,[0.1 min(options.FrameRate/2,30)];
+% 'Window'          ,5;
+% 'figureHandle'    ,[];
+% 'scaleAxis'       ,'linear';
 
 % DEFAULT Options
 options.VerboseMessage=true;

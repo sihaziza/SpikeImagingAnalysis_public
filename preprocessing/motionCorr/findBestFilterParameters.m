@@ -18,7 +18,7 @@ if strcmpi(ext,'.h5')
     temp=h5read(filePath,dataset,[1 1 dim(3)-100],[mx my 100]); 
     temp=mean(temp,3);
 elseif strcmpi(ext,'.dcimg')
-    [temp,~,~]=loadDCIMG(filePath,[100 199],'parallel',1,'verbose',0,'imshow',0);%,...
+    [temp,~,~]=loadDCIMG(filePath,[100 199],'parallel',false,'verbose',true,'imshow',true);%,...
 %         'resize',false,'scale_factor',1/metadata.softwareBinning,);   
     temp=mean(temp,3);
     dim=size(temp);
@@ -39,7 +39,7 @@ for iLow=1:length(lowF)
 end
 
 figure('Name','Behavioral Metrics','defaultaxesfontsize',16,'color','w')
-montage(frameBP,'Size', [length(lowF) length(highF)],'DisplayRange', [],'BorderSize',[2 2] );
+montage(frameBP),'Size', [length(lowF) length(highF)],'DisplayRange', [],'BorderSize',[2 2]);
 xlabel('High-Pass from 1pix -> 9pix - step 2')
 ylabel('Low-Pass from 50 pix <- 10 pix - step 10')
 title('Montage of band-pass filtered images')

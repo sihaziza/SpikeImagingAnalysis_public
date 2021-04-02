@@ -1,5 +1,7 @@
 function [output]=pieceWiseUnmixing(signal, reference, Fs, varargin)
 
+
+
 % for now, only work with vectors for both inputs
 % first scale is always correspond to 4 slices.
 % alternatively, use 1sec window with overlap (from 0% to 90% ovlp)

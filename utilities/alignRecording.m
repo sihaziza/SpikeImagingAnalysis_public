@@ -30,11 +30,11 @@ for iMeas=1:numel(parsedData)
     [ttlE_temp,ttlO_temp,fps]=equalizeSamplingRate(ttlE_temp,ttlO_temp);
     
     [range_ttlE,range_ttlO]=alignSyncTTL(ttlE_temp,ttlO_temp,fps);
-    
-    dataStructure(iMeas).ePhys=
-    dataStructure(iMeas).oPhys=
-    dataStructure(iMeas).ttl=
-    dataStructure(iMeas).fps=
+%     
+%     dataStructure(iMeas).ePhys=
+%     dataStructure(iMeas).oPhys=
+%     dataStructure(iMeas).ttl=
+%     dataStructure(iMeas).fps=
     
 end
 
