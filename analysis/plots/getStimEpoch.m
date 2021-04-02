@@ -18,7 +18,7 @@ options.baselinePrePost=1; % 1sec baseline
 options.getShuffle=false;
 
 %% UPDATE OPTIONS
-if nargin>=2
+if nargin>3
     options=getOptions(options,varargin);
 end
 %%
@@ -40,14 +40,13 @@ if options.getShuffle
     temp=temp(randperm(numel(temp)));
     idx_shuffle = sort(temp(1:numel(idx_raw)),'ascend')';
 end
-plot([idx_raw idx_shuffle],'o')
+% plot([idx_raw idx_shuffle],'o')
 nStim=length(idx_raw);
 
 fprintf('%d Cues detected\n',nStim)
 
 % sort out each epoch for each channels
 arrayRaw=zeros((2*marging+stimLength)*Fs,nStim,nChannel);
-arrayShuffle=zeros((2*marging+stimLength)*Fs,nStim,nChannel);
 
 disp('Assigning epoch on Raw data')
 for i=1:nStim
@@ -61,7 +60,15 @@ for i=1:nStim
     end
 end
 
+output.arrayRaw=arrayRaw;
+output.arrayShuffle=[];
+output.stimBand=stimBand;
+output.indexTTLraw=idx_raw;
+output.indexTTLshuffle=[];
+
 if options.getShuffle
+    arrayShuffle=zeros((2*marging+stimLength)*Fs,nStim,nChannel);
+    
     disp('Assigning epoch on Shuffled data')
     for i=1:nStim
         try
@@ -73,13 +80,11 @@ if options.getShuffle
             disp(strcat('fail @ index=',num2str(i)))
         end
     end
+    output.arrayShuffle=arrayShuffle;
+    output.indexTTLshuffle=idx_shuffle;
 end
 
-output.arrayRaw=arrayRaw;
-output.arrayShuffle=arrayShuffle;
-output.stimBand=stimBand;
-output.indexTTLraw=idx_raw;
-output.indexTTLshuffle=idx_shuffle;
 output.options=options;
+
 
 end
