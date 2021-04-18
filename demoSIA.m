@@ -87,8 +87,16 @@ for iMeas=1:numel(metaFileList)
     end
 end
 
+%% MANUAL CURING OF EXTRACT OUTPUT
+% the function will run recursively through all EXTRACT output file found
+% in all subfolders from the parent path 'mainFolder'
+
+mainFolder=[where you saved the extract cleaned .mat structure];
+
+cleanExtractFiles(mainFolder)
+
 %% INFER SPIKE TRAIN
-% manual clean should have been done before-hand...
+% !!! manual clean should have been done before-hand !!!
 
 mainFolder=[where you saved the extract cleaned .mat structure];
 
