@@ -109,6 +109,7 @@ end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %%%%% DUPLEX Paper - Spike Imaging Analysis Pipeline %%%%%
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        
 % manual clean should have been done before-hand...
 
 mainFolder='F:\GEVI_Spike\Preprocessed\Whiskers\m83\20201124\meas07';
