@@ -1,4 +1,4 @@
-function [cropMovie, corn] = postcropping(movie,corn)
+function [cropMovie, corn] = postCropping(movie,corn)
 % crop image to remove boundary values
 % more advanced version, 2019-12-04 by Jizhou Li
 % improved version, 2020-05-14 by Simon Haziza
