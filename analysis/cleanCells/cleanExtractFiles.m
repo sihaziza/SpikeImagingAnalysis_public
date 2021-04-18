@@ -1,5 +1,7 @@
 function cleanExtractFiles(path)
 
+% figure position for home workstation [1383,953,1920,970] / lab workstation [6,1241,1920,970]
+
 options.skipCleanFile=true;
 
 filelist = dir(fullfile(path, '**\DemixingEXTRACT'));
@@ -15,21 +17,7 @@ else
                 filePath=fullfile(mFile(i).folder,mFile(i).name);
                 savePath=strrep(filePath,'.mat','_clean.mat');
                 if ~contains(filePath,'_clean.mat')
-                    if exist(savePath,'file')
-                          
-                        %                     % could display a figure before taking a decision
-                        %                     figH=figure('defaultaxesfontsize',16,'color','w','Name','summary of selected cells');
-                        % nUnits=min(10,numel(cellList));
-                        % for i=1:nUnits
-                        %     subplot(10,10,[10*(i-1)+1 10*(i-1)+2])
-                        %     imagesc(spatial(:,:,cellList(i)))
-                        %     axis off
-                        %     ylabel(num2str(cellList(i)))
-                        %     subplot(10,10,[10*(i-1)+3 10*i])
-                        %     plot(time,temporal(:,cellList(i)))
-                        %     axis tight
-                        % end
-                        
+                    if exist(savePath,'file')                    
                         if options.skipCleanFile % then do not replace/delete...
                             answer=0;
                         else

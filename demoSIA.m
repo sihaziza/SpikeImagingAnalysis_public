@@ -92,8 +92,8 @@ end
 % in all subfolders from the parent path 'mainFolder'
 
 mainFolder=[where you saved the extract cleaned .mat structure];
-
-cleanExtractFiles(mainFolder)
+mainFolder='F:\GEVI_Spike\Preprocessed\Spontaneous\m915';
+cleanExtractFiles(mainFolder);
 
 %% INFER SPIKE TRAIN
 % !!! manual clean should have been done before-hand !!!
@@ -119,53 +119,5 @@ end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %%%%% DUPLEX Paper - Spike Imaging Analysis Pipeline %%%%%
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        metaPath=fullfile(metaFileList(iMeas).folder,metaFileList(iMeas).name);
-        load(metaPath);
-        
-        % Load & Convert .dcimg data
-        loading(metadata.allPaths);
-        
-        % GENERATE THE BANDPASS MOVIE FOR MOTION CORRECTION
-        bandPassMovieChunk(metadata.allPaths.h5PathG);
-        
-        % CORRECT THE MOVIE FROM MOTION ARTEFACTS
-        path=strrep(metadata.allPaths.h5PathG,'.h5', '_bp.h5');
-        motionCorr1Movie(path,'nonRigid', false,'isRawInput',false,'dcRemoval',false);
-
-        % DETREND the movie
-        path=strrep(metadata.allPaths.h5PathG, '.h5','_bp_moco.h5');
-        detrending(path,'samplingRate',metadata.fps,'lpCutOff',0.5,'spatialChunk',true,'binning',2);
-
-        % DEMIX THE MOVIE TO FIND SINGLE NEURONS
-        path=strrep(metadata.allPaths.h5PathG,'.h5','_bp_moco_dtr.h5');
-        tic;runEXTRACT(path,'polarityGEVI','neg','cellRadius',20);toc;
-        
-    catch ME
-    end
-end
-
-%% INFER SPIKE TRAIN
-% manual clean should have been done before-hand...
-
-mainFolder=[where you saved the extract cleaned .mat structure];
-
-% find all dcimg path and remove duplicates at G&R dcimg are in the same folder
-metaFileList = dir(fullfile(mainFolder, '**\*_clean.mat'));
-
-if isempty(metaFileList)
-    error('no metadata file has been generate > run getRawMetaData.m')
-end
-
-for iFile=1:numel(metaFileList)
-    try
-        path=fullfile(metaFileList(iFile).folder,metaFileList(iFile).name);
-        
-        [output]=getSpikesAllNeurons(path);
-    catch
-    end
-end
-%% 
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %%%%% DUPLEX Paper - Spike Imaging Analysis Pipeline %%%%%
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+       
         

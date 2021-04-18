@@ -4,7 +4,8 @@ function [cellList,figH]=extractCheckCellManual(output,varargin)
 % % options.cellList=[];
 options.waitForUser=true;
 options.frameRate=700;
-options.positionFig=[6,1241,1920,970];%[1383,953,1920,970])
+options.positionFig=[100,100,800,400]; 
+
 %% UPDATE OPTIONS
 if nargin>1
     options=getOptions(options,varargin);
@@ -16,6 +17,7 @@ if isempty(output.temporal_weights)
     figH=figure();
     return;
 end
+
 spatial=full(output.spatial_weights);
 temporal=wdenoise(double(output.temporal_weights),1);
 % fs=output.fs;
@@ -81,7 +83,7 @@ switch answer
 %         close all
     case 'No do it again'
         close all
-        disp('Lets run cel check again')
+        disp('Lets run cell-check again')
         [cellList,figH]=extractCheckCellManual(output);
 end
 %dont close figure for PDF saving
