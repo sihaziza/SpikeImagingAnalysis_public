@@ -1,18 +1,18 @@
-function [umxSignal,umxReference]=runFastICA(source,reference)
+function [umxSignal]=runFastICAnd(input)
 
 options.savePath=[];
 options.figName= '_runFastICA';
-options.plotFigure=[];
+options.plotFigure=true;
 
 % Make sure M is a row matrix
-if isrow(source) && isrow(reference)
-    M=double([source reference]);
+if iscolumn(input)
+    M=double(input');
 else
-    M=double([source' reference']);
+    M=double(input);
 end
 
 % run fastICA
-[icasig, ~, ~] = fastica(M','approach','symm','g','tanh','epsilon',1e-6,...
+[icasig, ~, ~] = fastica(M','g','tanh','epsilon',1e-7,...
     'stabilization','on','displayMode','off','verbose','off');
 icasig=icasig';
 
@@ -23,16 +23,17 @@ N = size(X1,1);
 X1_norm = zscore(X1,1,1)/sqrt(N);
 X2_norm = zscore(X2,1,1)/sqrt(N);
 C = X1_norm'*X2_norm;
-C(abs(C)<0.75)=0;
+C(abs(C)<0.6)=0;
 C=round(C);
 umx=(C*icasig')';
 
 % rescale as original inputs
-umx(:,1)=rescale(umx(:,1),min(M(:,1)),max(M(:,1)));
-umx(:,2)=rescale(umx(:,2),min(M(:,2)),max(M(:,2)));
+for i=1:size(M,2)
+umxSignal(:,i)=rescale(umx(:,i),min(M(:,i)),max(M(:,i)));
+end
 
-umxSignal=umx(:,1);
-umxReference=umx(:,2);
+% umxSignal=umx(:,1);
+% umxReference=umx(:,2);
 
 if options.plotFigure
     figH=figure('Name','fastICA output','DefaultAxesFontSize',12,'color','w');
