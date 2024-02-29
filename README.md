@@ -14,8 +14,7 @@ pull the newest `develop` branch from `SpikeImagingAnalysis`
 
 Code related to the paper "Dual polarity voltage imaging reveals subthreshold dynamics and concurrent spiking patterns of multiple neuron-types",
 Madhuvanthi Kannan,  Ganesh Vasan,  Simon Haziza, Cheng Huang, Radek Chrapkiewicz, Junjie Luo, Jessica A. Cardin,  Mark J. Schnitzer,  Vincent A. Pieribone
-doi: https://doi.org/10.1101/2021.10.13.463730
 
-https://www.biorxiv.org/content/10.1101/2021.10.13.463730v1.abstract
+https://www.science.org/doi/full/10.1126/science.abm8797
 
 Data repository at: https://tinyurl.com/kannanEtAlScience2022 
