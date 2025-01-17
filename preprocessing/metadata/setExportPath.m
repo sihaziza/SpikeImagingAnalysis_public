@@ -38,7 +38,7 @@ if size(fileName,1)==2
     options.dcimgPathG=fullfile(dcimgPath,fileNameG);
     options.dcimgPathR=fullfile(dcimgPath,fileNameR);
 elseif size(fileName,1)==1
-    if ~isempty(strfind(allPaths.dcimgPathG,'cG.dcimg'))
+    if ~isempty(strfind(fileName.name,'cG.dcimg'))
         [fileNameG]=fileName.name;
         options.dcimgPathG=fullfile(dcimgPath,fileNameG);
         options.dcimgPathR=[];
@@ -51,21 +51,8 @@ else
     error('Oups... no dcimg file detected');
 end
 
-% Checking if we are on the right path and determining the output path
-pathStructure=[];
-try
-    pathStructure=voltPaths(fileparts(options.dcimgPathG));
-catch
-    disp('Not the correct path - OK, saving along with the raw file')
-end
-
-if ~isempty(options.exportFolder)
-    folderExport=options.exportFolder;
-elseif pathStructure.valid_structure
-    folderExport=pathStructure.PreprocessingTemporary;
-else
-    folderExport=fullfile(fileName(1).folder,'results');
-end
+% set the folder path to save the processing data
+folderExport=fullfile(fileName(1).folder,'results');
 
 if ~isfolder(folderExport)
     mkdir(folderExport)
@@ -73,47 +60,6 @@ end
 
 options.exportFolder=folderExport;
 options.metadataPath=fullfile(folderExport,'metadata.mat');
-
-%% Create all diagnostic folders
-options.diagnosticFolder=fullfile(folderExport,'diagnostic');
-if ~isfolder(options.diagnosticFolder)
-    mkdir(options.diagnosticFolder)
-end
-
-options.pathDiagLoading=fullfile(options.diagnosticFolder,'loading');
-if options.loading && ~isfolder(options.pathDiagLoading)
-    mkdir(options.pathDiagLoading)
-end
-
-options.pathDiagRegistration=fullfile(options.diagnosticFolder,'registration');
-if options.registration && ~isfolder(options.pathDiagRegistration)
-    mkdir(options.pathDiagRegistration)
-end
-
-options.pathDiagMotionCorr=fullfile(options.diagnosticFolder,'motionCorr');
-if options.motionCorr && ~isfolder(options.pathDiagMotionCorr)
-    mkdir(options.pathDiagMotionCorr)
-end
-
-options.pathDiagDenoising=fullfile(options.diagnosticFolder,'denoising');
-if options.denoising && ~isfolder(options.pathDiagDenoising)
-    mkdir(options.pathDiagDenoising)
-end
-
-options.pathDiagUnmixing=fullfile(options.diagnosticFolder,'Unmixing');
-if options.unmixing && ~isfolder(options.pathDiagUnmixing)
-    mkdir(options.pathDiagUnmixing)
-end
-
-options.pathDiagDemixing=fullfile(options.diagnosticFolder,'demixing');
-if options.demixing && ~isfolder(options.pathDiagDemixing)
-    mkdir(options.pathDiagDemixing)
-end
-
-options.pathDiagBehavior=fullfile(options.diagnosticFolder,'behavior');
-if options.behavior && ~isfolder(options.pathDiagBehavior)
-    mkdir(options.pathDiagBehavior)
-end
 
 %% Set and Check for h5 file
 if size(fileName,1)==2

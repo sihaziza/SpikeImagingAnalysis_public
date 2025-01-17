@@ -1,0 +1,109 @@
+16-Jan-2025 16:29:18 loading: Starting conversion of two DCIMG to H5 files
+16-Jan-2025 16:29:18 loading: Loading data in chunks
+16-Jan-2025 16:29:18 loadDCIMGchunks: Starting loading file in chunks
+16-Jan-2025 16:29:18 loadDCIMGchunks: D:\GEVI_Spike\Raw\Spontaneous\mRL000\20240918\meas00\mRL000_d240918_s00fullFoV_150Hz-fps601-cG.dcimg
+16-Jan-2025 16:29:18 loadDCIMGchunks: Getting info from the first frames
+Starting parallel pool (parpool) using the 'local' profile ...
+Connected to the parallel pool (number of workers: 24).
+16-Jan-2025 16:30:22 loadDCIMGchunks: Converting DCIMG to H5 rather than loading to memory
+16-Jan-2025 16:30:26 h5append: Creating new dataset
+16-Jan-2025 16:30:27 h5append: H5 file saved
+16-Jan-2025 16:30:31 h5append: Dataset already exists, appending
+16-Jan-2025 16:30:31 h5append: H5 file saved
+16-Jan-2025 16:30:35 h5append: Dataset already exists, appending
+16-Jan-2025 16:30:35 h5append: H5 file saved
+16-Jan-2025 16:30:39 h5append: Dataset already exists, appending
+16-Jan-2025 16:30:39 h5append: H5 file saved
+16-Jan-2025 16:30:43 h5append: Dataset already exists, appending
+16-Jan-2025 16:30:44 h5append: H5 file saved
+16-Jan-2025 16:30:47 h5append: Dataset already exists, appending
+16-Jan-2025 16:30:48 h5append: H5 file saved
+16-Jan-2025 16:30:52 h5append: Dataset already exists, appending
+16-Jan-2025 16:30:52 h5append: H5 file saved
+16-Jan-2025 16:30:55 h5append: Dataset already exists, appending
+16-Jan-2025 16:30:56 h5append: H5 file saved
+16-Jan-2025 16:31:00 h5append: Dataset already exists, appending
+16-Jan-2025 16:31:00 h5append: H5 file saved
+16-Jan-2025 16:31:03 h5append: Dataset already exists, appending
+16-Jan-2025 16:31:04 h5append: H5 file saved
+16-Jan-2025 16:31:04 loading: One movie loaded
+{Unrecognized function or variable 'movieR'.
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('loading', 'C:\Users\Pr Simon Haziza\Desktop\GitHub\SpikeImagingAnalysis_public\preprocessing\loading\loading.m', 89)" style="font-weight:bold">loading</a> (<a href="matlab: opentoline('C:\Users\Pr Simon Haziza\Desktop\GitHub\SpikeImagingAnalysis_public\preprocessing\loading\loading.m',89,0)">line 89</a>)
+    tempR=mean(movieR,3);} 
+opentoline('C:\Users\Pr Simon Haziza\Desktop\GitHub\SpikeImagingAnalysis_public\preprocessing\loading\loading.m',89,0)
+% Load & Convert .dcimg data
+        loading(metadata.allPaths);
+16-Jan-2025 16:33:28 loading: Starting conversion of two DCIMG to H5 files
+16-Jan-2025 16:33:28 loading: Loading data in chunks
+16-Jan-2025 16:33:28 loadDCIMGchunks: Starting loading file in chunks
+16-Jan-2025 16:33:28 loadDCIMGchunks: D:\GEVI_Spike\Raw\Spontaneous\mRL000\20240918\meas00\mRL000_d240918_s00fullFoV_150Hz-fps601-cG.dcimg
+16-Jan-2025 16:33:28 loadDCIMGchunks: Getting info from the first frames
+16-Jan-2025 16:33:28 loadDCIMGchunks: Converting DCIMG to H5 rather than loading to memory
+16-Jan-2025 16:33:28 loadDCIMGchunks: Already found h5 file:D:\GEVI_Spike\Raw\Spontaneous\mRL000\20240918\meas00\results\mRL000_d240918_s00fullFoV_150Hz-fps601-cG.h5deleting!
+16-Jan-2025 16:33:32 h5append: Creating new dataset
+16-Jan-2025 16:33:32 h5append: H5 file saved
+16-Jan-2025 16:33:35 h5append: Dataset already exists, appending
+16-Jan-2025 16:33:35 h5append: H5 file saved
+16-Jan-2025 16:33:38 h5append: Dataset already exists, appending
+16-Jan-2025 16:33:39 h5append: H5 file saved
+16-Jan-2025 16:33:42 h5append: Dataset already exists, appending
+16-Jan-2025 16:33:42 h5append: H5 file saved
+16-Jan-2025 16:33:46 h5append: Dataset already exists, appending
+16-Jan-2025 16:33:46 h5append: H5 file saved
+16-Jan-2025 16:33:50 h5append: Dataset already exists, appending
+16-Jan-2025 16:33:50 h5append: H5 file saved
+16-Jan-2025 16:33:53 h5append: Dataset already exists, appending
+16-Jan-2025 16:33:54 h5append: H5 file saved
+16-Jan-2025 16:33:57 h5append: Dataset already exists, appending
+16-Jan-2025 16:33:57 h5append: H5 file saved
+16-Jan-2025 16:34:01 h5append: Dataset already exists, appending
+16-Jan-2025 16:34:01 h5append: H5 file saved
+16-Jan-2025 16:34:05 h5append: Dataset already exists, appending
+16-Jan-2025 16:34:05 h5append: H5 file saved
+16-Jan-2025 16:34:05 loading: One movie loaded
+% GENERATE THE BANDPASS MOVIE FOR MOTION CORRECTION
+        bandPassMovieChunk(metadata.allPaths.h5PathG,metadata.vectorBandPassFilter);
+16-Jan-2025 16:34:10 BandPassMovie: Start BandPassChunk Function
+h5 file detected
+Loading and processing 10000 frames in chunks.
+Loading 1000 frames; 
+16-Jan-2025 16:34:16 h5append: Creating new dataset
+16-Jan-2025 16:34:16 h5append: H5 file saved
+Elapsed time is 6.725283 seconds.
+Loading 2000 frames; 
+16-Jan-2025 16:34:22 h5append: Dataset already exists, appending
+16-Jan-2025 16:34:22 h5append: H5 file saved
+Elapsed time is 5.974062 seconds.
+Loading 3000 frames; 
+16-Jan-2025 16:34:27 h5append: Dataset already exists, appending
+16-Jan-2025 16:34:28 h5append: H5 file saved
+Elapsed time is 5.429928 seconds.
+Loading 4000 frames; 
+16-Jan-2025 16:34:33 h5append: Dataset already exists, appending
+16-Jan-2025 16:34:33 h5append: H5 file saved
+Elapsed time is 5.274777 seconds.
+Loading 5000 frames; 
+16-Jan-2025 16:34:38 h5append: Dataset already exists, appending
+16-Jan-2025 16:34:38 h5append: H5 file saved
+Elapsed time is 5.105822 seconds.
+Loading 6000 frames; 
+16-Jan-2025 16:34:43 h5append: Dataset already exists, appending
+16-Jan-2025 16:34:43 h5append: H5 file saved
+Elapsed time is 5.323832 seconds.
+Loading 7000 frames; 
+16-Jan-2025 16:34:49 h5append: Dataset already exists, appending
+16-Jan-2025 16:34:49 h5append: H5 file saved
+Elapsed time is 5.458310 seconds.
+Loading 8000 frames; 
+16-Jan-2025 16:34:53 h5append: Dataset already exists, appending
+16-Jan-2025 16:34:54 h5append: H5 file saved
+Elapsed time is 4.895852 seconds.
+Loading 9000 frames; 
+16-Jan-2025 16:34:59 h5append: Dataset already exists, appending
+16-Jan-2025 16:34:59 h5append: H5 file saved
+Elapsed time is 5.296946 seconds.
+Loading 10000 frames; 
+16-Jan-2025 16:35:04 h5append: Dataset already exists, appending
+16-Jan-2025 16:35:04 h5append: H5 file saved
+Elapsed time is 4.999955 seconds.
+16-Jan-2025 16:35:04 BandPassMovie: Spatial Band-Pass filtering finished

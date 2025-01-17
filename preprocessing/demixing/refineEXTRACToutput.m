@@ -1,4 +1,4 @@
-function [output]=runEXTRACT(h5Path,varargin)
+function [output_out]=refineEXTRACToutput(h5Path,output_in,choices,varargin)
 
 
 %% OPTIONS
@@ -14,10 +14,9 @@ options.binning=[];
 options.partition=[1 1];
 options.cellRadius=20;
 options.removeBackground=true;
-options.method='L2'; %'robust'
 
 %% UPDATE OPTIONS
-if nargin>1
+if nargin>3
     options=getOptions(options,varargin);
 end
 
@@ -54,7 +53,7 @@ if ischar(h5Path)
 else
     M=h5Path;
 end
-%%
+
 %Initialize config
 config=[];
 config = get_defaults(config);
@@ -72,6 +71,7 @@ config.avg_cell_radius=options.cellRadius; %Pick a reasonable cell radius
 %but still a good idea to keep these in sight!
 config.num_partitions_x=options.partition(1);
 config.num_partitions_y=options.partition(2);
+% config.preprocess=0;
 % config.temporal_denoising=0;
 % config.spatial_highpass_spatial=inf;
 % config.cellfind_filter_type='butter'; % Feel free to use your own filters,
@@ -83,22 +83,11 @@ config.cellfind_max_steps=100;
 config.max_iter=5;
 
 % Voltage specific configs
-config.trace_output_option='no_constraint';
+config.trace_output_option='raw';
+config.kappa_std_ratio=100;
+config.cellfind_kappa_std_ratio=100;
 config.cellfind_min_snr=0;
 config.thresholds.T_min_snr=0;
-config.cellfind_kappa_std_ratio=0.7; % for final cell find
-
-% my movie are already preprocessed (moco and detrending)
-config.preprocess=1;
-
-% parameter to use for Extract paper
-if strcmpi(options.method,'L2')   
-    config.kappa_std_ratio=100; % L2 solver - used in Science paper    
-elseif strcmpi(options.method,'robust')    
-    config.kappa_std_ratio=0.7; % Extract solver % SH-20230116
-else
-    error('requested demixing method not found...');
-end
 
 config.background_removal=options.removeBackground;
 
@@ -106,9 +95,9 @@ config.background_removal=options.removeBackground;
 switch options.polarityGEVI
     case 'pos'
         
-        % M=M-1; % -1 added to compute (f-f0)/f0 instead of f/f0
         output=extractor(M,config);
-        
+        [traces,filters]=final_robust_run(M,output_in,choices);
+
         if ischar(h5Path)
             fileName=['extractOutput_' options.polarityGEVI '_' datestr(datetime('now'),'yyyymmddTHHMMSS') '.mat'];
             savePath=fullfile(outputdir,fileName);
@@ -118,12 +107,12 @@ switch options.polarityGEVI
     case 'neg'
         
         disps('matrix inversion')
-        M=-M+2*mean(M,3); % -1 added to compute (f-f0)/f0 instead of f/f0
-%         plot(getPointProjection(M))
+        M=-M+2*mean(M,3);
+        
         output=extractor(M,config);
         
         if ischar(h5Path)
-            fileName=['extractOutput_' options.polarityGEVI '_' options.method '_' datestr(datetime('now'),'yyyymmddTHHMMSS') '.mat'];
+            fileName=['extractOutput_' options.polarityGEVI '_' datestr(datetime('now'),'yyyymmddTHHMMSS') '.mat'];
             savePath=fullfile(outputdir,fileName);
             save(savePath,'output');
         end
@@ -137,20 +126,20 @@ switch options.polarityGEVI
         
         options.polarityGEVI='pos';
         if ischar(h5Path)
-            fileName=['extractOutput_' options.polarityGEVI '_' options.method '_' datestr(datetime('now'),'yyyymmddTHHMMSS') '.mat'];
+            fileName=['extractOutput_' options.polarityGEVI '_' datestr(datetime('now'),'yyyymmddTHHMMSS') '.mat'];
             savePath=fullfile(outputdir,fileName);
             save(savePath,'output');
         end
         
         disps('running negative Extract')        
         disps('matrix inversion')
-        M=-M+2*mean(M,3); % -1 added to compute (f-f0)/f0 instead of f/f0
+        M=-M+2*mean(M,3);
         
         output=extractor(M,config);
         
         options.polarityGEVI='neg';
         if ischar(h5Path)
-            fileName=['extractOutput_' options.polarityGEVI '_' options.method '_' datestr(datetime('now'),'yyyymmddTHHMMSS') '.mat'];
+            fileName=['extractOutput_' options.polarityGEVI '_' datestr(datetime('now'),'yyyymmddTHHMMSS') '.mat'];
             savePath=fullfile(outputdir,fileName);
             save(savePath,'output');
         end
