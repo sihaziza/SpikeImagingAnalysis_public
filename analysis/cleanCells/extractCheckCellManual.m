@@ -3,7 +3,7 @@ function [cellList,figH]=extractCheckCellManual(output,varargin)
 % can input your own cell list.
 % % options.cellList=[];
 options.waitForUser=true;
-options.frameRate=700;
+options.frameRate=[];
 options.positionFig=[100,100,800,400]; 
 
 %% UPDATE OPTIONS
@@ -20,8 +20,16 @@ end
 
 spatial=full(output.spatial_weights);
 temporal=wdenoise(double(output.temporal_weights),1);
-% fs=output.fs;
-fs=options.frameRate;
+if ~isempty(options.frameRate) && isnumeric(options.frameRate) && isscalar(options.frameRate) && options.frameRate>0
+    fs=double(options.frameRate);
+elseif isstruct(output) && isfield(output,'fs') && isnumeric(output.fs) && isscalar(output.fs) && output.fs>0
+    fs=double(output.fs);
+elseif isstruct(output) && isfield(output,'fps') && isnumeric(output.fps) && isscalar(output.fps) && output.fps>0
+    fs=double(output.fps);
+else
+    fs=700;
+    warning('Frame rate not provided. Falling back to 700 Hz. Pass ''frameRate'',metadata.fps to avoid wrong time axis.');
+end
 time=getTime(temporal,fs);
 decade=1;
 p=0;
@@ -84,7 +92,7 @@ switch answer
     case 'No do it again'
         close all
         disp('Lets run cell-check again')
-        [cellList,figH]=extractCheckCellManual(output);
+        [cellList,figH]=extractCheckCellManual(output,'frameRate',fs);
 end
 %dont close figure for PDF saving
 end
