@@ -28,7 +28,20 @@ else
                             disp('clean file already exist... replacing...')
                             delete(savePath)
                             load(filePath,'output')
-                            [cellID,figH]=extractCheckCellManual(output,'waitForUser',true);
+                            frameRate=[];
+                            resultsPath=fileparts(fileparts(mFile(i).folder));
+                            metadataPath=fullfile(resultsPath,'metadata.mat');
+                            if exist(metadataPath,'file')
+                                metadataRaw=load(metadataPath,'metadata');
+                                if isfield(metadataRaw,'metadata') && isfield(metadataRaw.metadata,'fps') && ~isempty(metadataRaw.metadata.fps)
+                                    frameRate=metadataRaw.metadata.fps;
+                                end
+                            end
+                            if isempty(frameRate)
+                                [cellID,figH]=extractCheckCellManual(output,'waitForUser',true);
+                            else
+                                [cellID,figH]=extractCheckCellManual(output,'waitForUser',true,'frameRate',frameRate);
+                            end
                             output.cellID=cellID;
                             save(savePath,'output')
                             pathParts=strsplit(mFile(i).folder,filesep);
@@ -41,7 +54,20 @@ else
                         end
                     else
                         load(filePath,'output')
-                        [cellID,figH]=extractCheckCellManual(output,'waitForUser',true);
+                        frameRate=[];
+                        resultsPath=fileparts(fileparts(mFile(i).folder));
+                        metadataPath=fullfile(resultsPath,'metadata.mat');
+                        if exist(metadataPath,'file')
+                            metadataRaw=load(metadataPath,'metadata');
+                            if isfield(metadataRaw,'metadata') && isfield(metadataRaw.metadata,'fps') && ~isempty(metadataRaw.metadata.fps)
+                                frameRate=metadataRaw.metadata.fps;
+                            end
+                        end
+                        if isempty(frameRate)
+                            [cellID,figH]=extractCheckCellManual(output,'waitForUser',true);
+                        else
+                            [cellID,figH]=extractCheckCellManual(output,'waitForUser',true,'frameRate',frameRate);
+                        end
                         output.cellID=cellID;
                         save(savePath,'output')
                         savePDF(figH,strrep(mFile(i).name,'.mat','_summaryCellFilters'),mFile(i).folder)
