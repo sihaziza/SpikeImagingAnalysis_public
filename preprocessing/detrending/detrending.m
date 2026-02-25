@@ -74,8 +74,12 @@ if ischar(h5Path)
 else
     disps('Using movie from workspace')
     M=h5Path;
-    dim=size(M);
 end
+
+if ndims(M)~=3
+    error('Input movie must be a 3D array [x y t].');
+end
+[mx,my,numFrame]=size(M);
 
 fs=options.samplingRate;
 lpCutOff=options.lpCutOff;
@@ -90,10 +94,24 @@ end
 
 if options.spatialChunk % if too many pixels > detrending is pixel-independent
     disps('Detrending in spatial chunks')
-    chunks=0:round(mx/10):mx;
-    for i=1:numel(chunks)-1
+    nSpatialChunks=min(10,mx);
+    chunkEdges=round(linspace(0,mx,nSpatialChunks+1));
+    chunkEdges=unique(chunkEdges);
+
+    if options.saveData
+        disps('Saving data as h5 file')
+        h5create(options.detrendMoviePath,dataset,[mx my numFrame],'Datatype','single');
+    end
+
+    for i=1:numel(chunkEdges)-1
+        xStart=chunkEdges(i)+1;
+        xEnd=chunkEdges(i+1);
+        if xEnd<xStart
+            continue
+        end
+
         tic;
-        [movie_dtr]=runPhotoBleachingRemoval(M(chunks(i)+1:chunks(i+1),:,:),'samplingRate',fs,'lpCutOff',lpCutOff);
+        movie_dtr=runPhotoBleachingRemoval(M(xStart:xEnd,:,:),'samplingRate',fs,'lpCutOff',lpCutOff);
         toc; disps('Data succesfully detrended')
         
         if options.dfof
@@ -101,9 +119,15 @@ if options.spatialChunk % if too many pixels > detrending is pixel-independent
         end
         
         if options.saveData
-            disps('Saving data as h5 file')
-            h5append(options.detrendMoviePath, movie_dtr,options.dataset,'chunckingDimension',1);
-            toc; disps('Data succesfully saved')
+            h5write(options.detrendMoviePath, dataset, single(movie_dtr),[xStart 1 1],size(movie_dtr));
+            disps(sprintf('Data succesfully saved (%d/%d spatial chunks)',i,numel(chunkEdges)-1))
+        end
+    end
+
+    if options.saveData
+        infoOut=h5info(options.detrendMoviePath,dataset);
+        if ~isequal(double(infoOut.Dataspace.Size),double([mx my numFrame]))
+            error('Detrended file dimensions do not match input dimensions.');
         end
     end
     
